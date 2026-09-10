@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Fahrten- und Abo-Erfassung fuer den eBuxi Herzogenbuchsee">
+<meta name="theme-color" content="#F2C200">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="eBuxi">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>eBuxi Fahrtenjournal</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EDEDE8; --surface:#FFFFFF; --surface2:#F6F6F1; --sunk:#E4E4DE;
+  --line:#D7D7CF; --line-strong:#BEBEB4;
+  --ink:#1B1D1C; --ink2:#585C57; --ink3:#8A8E86;
+  --accent:#F2C200; --accent-ink:#1B1D1C; --accent-soft:#FAEEBE; --accent-line:#D9AE00;
+  --bar:#C9751A; --twint:#2A66AE; --abo:#1B7F63; --gratis:#83887F;
+  --ok:#1C7346; --warn:#A9491A;
+  --shadow:0 1px 1px rgba(27,29,28,.05), 0 10px 24px -16px rgba(27,29,28,.35);
+  --pill-ink:#FFFFFF;
+  --r:10px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#15171A; --surface:#1E2127; --surface2:#262A30; --sunk:#111316;
+    --line:#333941; --line-strong:#464D56;
+    --ink:#E9EAE4; --ink2:#A5ABA4; --ink3:#787E78;
+    --accent:#F5C93B; --accent-ink:#191B18; --accent-soft:#3B3417; --accent-line:#7A6A1E;
+    --bar:#E4A054; --twint:#6BA3E2; --abo:#3EB394; --gratis:#8A9089;
+    --ok:#4FBB85; --warn:#E0894F;
+    --shadow:0 1px 1px rgba(0,0,0,.4), 0 10px 24px -16px rgba(0,0,0,.8);
+    --pill-ink:#15170F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#15171A; --surface:#1E2127; --surface2:#262A30; --sunk:#111316;
+  --line:#333941; --line-strong:#464D56;
+  --ink:#E9EAE4; --ink2:#A5ABA4; --ink3:#787E78;
+  --accent:#F5C93B; --accent-ink:#191B18; --accent-soft:#3B3417; --accent-line:#7A6A1E;
+  --bar:#E4A054; --twint:#6BA3E2; --abo:#3EB394; --gratis:#8A9089;
+  --ok:#4FBB85; --warn:#E0894F;
+  --shadow:0 1px 1px rgba(0,0,0,.4), 0 10px 24px -16px rgba(0,0,0,.8);
+  --pill-ink:#15170F;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font:400 16px/1.45 "IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  -webkit-text-size-adjust:100%; overflow-x:hidden;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent-line); outline-offset:2px}
+h1,h2,h3{font-family:Archivo,"Arial Narrow",sans-serif;font-weight:800;margin:0;text-wrap:balance}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.lbl{font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+
+/* ---------- Kopfzeile ---------- */
+.top{position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1060px;margin:0 auto;padding:9px 14px;display:flex;align-items:center;gap:12px}
+.mark{display:flex;align-items:center;gap:9px;margin-right:auto;min-width:0}
+.mark .bx{
+  width:32px;height:32px;border-radius:8px;background:var(--accent);color:#1B1D1C;
+  display:grid;place-items:center;font-family:Archivo,sans-serif;font-weight:800;font-size:15px;
+  flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.14)
+}
+.mark b{font-family:Archivo,sans-serif;font-weight:800;font-size:18px;letter-spacing:-.01em}
+.mark span{font-size:12px;color:var(--ink3);display:block;line-height:1.1;margin-top:-1px}
+.sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);white-space:nowrap;
+  border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:6px 11px}
+.sync:hover{border-color:var(--line-strong)}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--ink3);flex:none}
+.sync.is-cloud i{background:var(--ok)}
+.sync.is-local i{background:var(--accent-line)}
+.sync.is-wait i{background:var(--warn);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.sync.is-wait i{animation:none}}
+
+/* ---------- Reiter ---------- */
+.tabs{max-width:1060px;margin:0 auto;padding:10px 14px 0;display:flex;gap:6px}
+.tab{
+  flex:1;padding:11px 8px;border:1px solid var(--line);border-bottom:none;
+  border-radius:var(--r) var(--r) 0 0;background:var(--surface2);color:var(--ink2);
+  font-weight:600;font-size:14.5px;position:relative;top:1px
+}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:inset 0 3px 0 var(--accent)}
+.tab b{display:block;font:inherit}
+.tab small{display:block;font-size:11px;color:var(--ink3);font-weight:500}
+
+.shell{max-width:1060px;margin:0 auto;padding:0 14px calc(96px + env(safe-area-inset-bottom))}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:0 0 var(--r) var(--r);padding:14px}
+.cols{display:grid;gap:16px}
+@media (min-width:900px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,352px);align-items:start}}
+
+/* ---------- Schichtkopf ---------- */
+.head{background:var(--surface2);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px}
+.head-row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+input[type="date"],select,input[type="text"]{
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;
+  padding:9px 10px;font-weight:500;max-width:100%
+}
+input[type="date"]{min-width:9.5em}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{
+  border:1px solid var(--line-strong);background:var(--surface);border-radius:999px;
+  padding:8px 13px;font-weight:600;font-size:14px;line-height:1
+}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent-line);color:var(--accent-ink)}
+.chip.mini{padding:6px 10px;font-size:13px;font-weight:500}
+
+/* ---------- Strecke ---------- */
+.route{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;margin-top:14px}
+.stop{display:flex;flex-direction:column;gap:4px;min-width:0}
+.stop-btn{
+  width:100%;text-align:left;background:var(--surface2);border:1.5px solid var(--line-strong);
+  border-radius:var(--r);padding:12px 12px;font-weight:600;font-size:16px;min-height:52px;
+  display:flex;align-items:center;gap:8px;overflow:hidden
+}
+.stop-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stop-btn.empty{color:var(--ink3);font-weight:500;border-style:dashed}
+.stop-btn:hover{border-color:var(--accent-line)}
+.swap{
+  border:1px solid var(--line-strong);background:var(--surface);border-radius:999px;
+  width:42px;height:42px;font-size:17px;display:grid;place-items:center;margin-bottom:5px
+}
+.quick{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+
+/* ---------- Zahlarten ---------- */
+.pays{margin-top:16px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.pay{display:flex;align-items:center;gap:10px;padding:9px 11px;border-top:1px solid var(--line);background:var(--surface)}
+.pay:first-child{border-top:none}
+.pay.on{background:var(--surface2)}
+.pay .dot{width:10px;height:10px;border-radius:3px;flex:none}
+.pay-t{margin-right:auto;min-width:0}
+.pay-t b{display:block;font-weight:600;font-size:15px}
+.pay-t small{color:var(--ink3);font-size:12px}
+.step{display:flex;align-items:center;gap:2px;flex:none}
+.step button{
+  width:44px;height:44px;border:1px solid var(--line-strong);background:var(--surface2);
+  font-size:21px;font-weight:600;line-height:1;display:grid;place-items:center
+}
+.step button:first-child{border-radius:8px 0 0 8px}
+.step button:last-child{border-radius:0 8px 8px 0}
+.step button:disabled{opacity:.35;cursor:default}
+.step output{
+  width:46px;height:44px;display:grid;place-items:center;font-size:19px;font-weight:600;
+  border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);background:var(--surface)
+}
+.paysum{display:flex;align-items:baseline;gap:8px;padding:10px 11px;border-top:1px solid var(--line);background:var(--surface2)}
+.paysum b{font-size:19px;font-family:Archivo,sans-serif}
+.paysum small{color:var(--ink2);margin-left:auto;font-size:13px}
+
+/* ---------- Aktionsleiste ---------- */
+.actionbar{
+  position:sticky;bottom:0;z-index:30;margin:14px -14px calc(-14px);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:var(--surface);
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line);
+  display:flex;gap:8px;align-items:center
+}
+.btn{
+  border:1px solid var(--line-strong);background:var(--surface2);border-radius:var(--r);
+  padding:13px 16px;font-weight:600;font-size:15px
+}
+.btn-main{
+  flex:1;background:var(--accent);border-color:var(--accent-line);color:var(--accent-ink);
+  display:flex;flex-direction:column;align-items:center;gap:1px;padding:11px 16px;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.13)
+}
+.btn-main b{font-family:Archivo,sans-serif;font-weight:800;font-size:16.5px}
+.btn-main small{font-size:12px;opacity:.78;font-weight:500}
+.btn-main:disabled{background:var(--sunk);border-color:var(--line);color:var(--ink3);box-shadow:none;cursor:default}
+.btn-del{color:var(--warn);border-color:var(--warn)}
+.hint{font-size:13px;color:var(--warn);padding:0 2px;min-height:1.2em;margin-top:8px}
+
+/* ---------- Listen ---------- */
+.side{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface2);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.card>h3{font-size:14px;letter-spacing:.02em;margin-bottom:9px}
+.rows{display:flex;flex-direction:column}
+.row{
+  display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;
+  padding:8px 2px;border-top:1px solid var(--line);text-align:left;width:100%;
+  background:none;border-left:none;border-right:none;border-bottom:none
+}
+.row:first-child{border-top:none}
+.row .strecke{font-weight:500;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .strecke i{color:var(--ink3);font-style:normal}
+.row .meta{font-size:12px;color:var(--ink3);white-space:nowrap}
+.row .pax{display:flex;gap:3px;align-items:center}
+.pill{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--pill-ink);
+  border-radius:5px;padding:2px 5px;line-height:1.3
+}
+.pill.b{background:var(--bar)} .pill.t{background:var(--twint)}
+.pill.a{background:var(--abo)} .pill.m{background:var(--abo);opacity:.72}
+.pill.k{background:var(--gratis)}
+.row .flag{font-size:11px;color:var(--warn)}
+.empty{color:var(--ink3);font-size:14px;padding:6px 2px}
+
+/* ---------- Übersicht ---------- */
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sum div{background:var(--surface);padding:8px 9px}
+.sum b{display:block;font-family:Archivo,sans-serif;font-weight:800;font-size:20px;line-height:1.1}
+.sum small{font-size:11px;color:var(--ink3);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.money{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px dashed var(--line);font-size:14px}
+.money:first-of-type{border-top:none}
+.money b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+
+/* ---------- Auswahl-Overlay ---------- */
+.sheet{position:fixed;inset:0;z-index:90;background:var(--ground);display:flex;flex-direction:column}
+.sheet-top{background:var(--surface);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;gap:8px;align-items:center}
+.sheet-top input{flex:1;font-size:17px;padding:11px 12px}
+.sheet-body{flex:1;overflow-y:auto;padding:6px 14px 30px;max-width:640px;margin:0 auto;width:100%}
+.sheet-sec{margin:12px 0 5px}
+.opt{
+  display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);
+  border-radius:8px;padding:12px 12px;font-size:16px;font-weight:500;margin-bottom:5px
+}
+.opt.hit{border-color:var(--accent-line);background:var(--accent-soft)}
+.opt em{font-style:normal;color:var(--ink3);font-size:13px;float:right}
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));
+  z-index:95;background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:999px;
+  font-size:14px;font-weight:600;box-shadow:var(--shadow);max-width:calc(100% - 28px);text-align:center
+}
+.note{font-size:13px;color:var(--ink2);background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:9px 11px;margin-top:12px}
+.bar-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.grow{flex:1}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="mark">
+      <div class="bx">eB</div>
+      <div>
+        <b>Fahrtenjournal</b>
+        <span>eBuxi Herzogenbuchsee</span>
+      </div>
+    </div>
+    <button class="sync is-wait" id="sync" title="Zugang einrichten" aria-label="Zugang einrichten"><i></i><span>verbinde…</span></button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab" role="tab" id="tab-fahrt" aria-selected="true"><b>Fahrt</b><small id="tc-fahrt">erfassen</small></button>
+  <button class="tab" role="tab" id="tab-abo" aria-selected="false"><b>Abo</b><small id="tc-abo">verkaufen</small></button>
+  <button class="tab" role="tab" id="tab-journal" aria-selected="false"><b>Journal</b><small id="tc-journal">nachsehen</small></button>
+</nav>
+
+<main class="shell">
+  <!-- ======== FAHRT ======== -->
+  <section class="pane" id="pane-fahrt">
+    <div class="cols">
+      <div>
+        <div class="head">
+          <div class="head-row">
+            <label class="f"><span class="lbl">Datum</span><input type="date" id="datum"></label>
+            <label class="f"><span class="lbl">Zeitraum</span><select id="zeitraum"></select></label>
+            <div class="f grow"><span class="lbl">Schicht</span><div class="chips" id="schichten"></div></div>
+          </div>
+        </div>
+
+        <div class="route">
+          <div class="stop">
+            <span class="lbl">Abholung</span>
+            <button class="stop-btn empty" id="von"><span>Strasse wählen</span></button>
+          </div>
+          <button class="swap" id="swap" title="Richtung tauschen" aria-label="Abholung und Ziel tauschen">⇄</button>
+          <div class="stop">
+            <span class="lbl">Ziel</span>
+            <button class="stop-btn empty" id="nach"><span>Strasse wählen</span></button>
+          </div>
+        </div>
+        <div class="quick" id="quick"></div>
+
+        <div class="pays" id="pays"></div>
+
+        <p class="hint" id="hint"></p>
+
+        <div class="actionbar">
+          <button class="btn btn-main" id="save" disabled><b>Fahrt speichern</b><small id="save-sub">Abholung und Ziel wählen</small></button>
+          <button class="btn" id="reset" title="Eingabe zurücksetzen">Leeren</button>
+          <button class="btn btn-del" id="delete" hidden>Löschen</button>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <h3 id="shift-title">Diese Schicht</h3>
+          <div class="sum" id="shift-sum"></div>
+          <div class="rows" id="shift-rows"></div>
+        </div>
+        <div class="card">
+          <h3 id="per-title">Zeitraum</h3>
+          <div class="sum" id="per-sum"></div>
+          <div id="per-money"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== ABO ======== -->
+  <section class="pane" id="pane-abo" hidden>
+    <div class="cols">
+      <div>
+        <div class="head">
+          <div class="head-row">
+            <label class="f"><span class="lbl">Datum</span><input type="date" id="a-datum"></label>
+            <label class="f"><span class="lbl">Zeitraum</span><select id="a-zeitraum"></select></label>
+            <div class="f grow"><span class="lbl">Schicht</span><div class="chips" id="a-schichten"></div></div>
+          </div>
+        </div>
+
+        <div class="f" style="margin-top:14px">
+          <span class="lbl">Abo-Art</span>
+          <div class="chips" id="a-typ">
+            <button class="chip" data-typ="10er" aria-pressed="true">10er-Abo · 35.–</button>
+            <button class="chip" data-typ="M" aria-pressed="false">Monatsabo · 60.–</button>
+          </div>
+        </div>
+
+        <div class="f" style="margin-top:14px">
+          <span class="lbl">Abo-Nummer</span>
+          <div class="bar-inline">
+            <select id="a-nr" class="grow"></select>
+            <button class="btn" id="a-nr-frei">Andere Nr…</button>
+          </div>
+          <input type="text" id="a-nr-manuell" placeholder="z. B. 25-14311" hidden>
+        </div>
+
+        <div class="f" style="margin-top:14px">
+          <span class="lbl">Zahlart</span>
+          <div class="chips" id="a-zahl">
+            <button class="chip" data-zahl="bar" aria-pressed="true">Bar</button>
+            <button class="chip" data-zahl="twint" aria-pressed="false">Twint</button>
+          </div>
+        </div>
+
+        <p class="hint" id="a-hint"></p>
+
+        <div class="actionbar">
+          <button class="btn btn-main" id="a-save"><b>Abo speichern</b><small id="a-save-sub">10er-Abo · 35.– · bar</small></button>
+          <button class="btn btn-del" id="a-delete" hidden>Löschen</button>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <h3>Nummern-Bestand</h3>
+          <div class="sum" id="a-bestand"></div>
+          <p class="note" id="a-bestand-note">Verkaufte Nummern verschwinden aus der Liste.</p>
+        </div>
+        <div class="card">
+          <h3 id="a-list-title">Verkaufte Abos</h3>
+          <div class="rows" id="a-rows"></div>
+          <div id="a-money"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== JOURNAL ======== -->
+  <section class="pane" id="pane-journal" hidden>
+    <div class="bar-inline">
+      <label class="f grow"><span class="lbl">Suchen</span><input type="text" id="j-suche" placeholder="Strasse, Datum oder Schicht"></label>
+      <button class="btn" id="j-more">Frühere Monate laden</button>
+    </div>
+    <div id="j-body"></div>
+  </section>
+  <!-- ======== EINRICHTUNG ======== -->
+  <section class="pane" id="pane-setup" hidden>
+    <div class="cols">
+      <div>
+        <h2 style="font-size:19px">Zugang zum Daten-Repo</h2>
+        <p style="color:var(--ink2);font-size:14.5px;margin:6px 0 0">
+          Die App liegt öffentlich auf GitHub Pages, deine Fahrten dagegen in einem
+          <b>privaten</b> Repo. Damit dieses Gerät dort lesen und schreiben darf, braucht es
+          einmalig ein Zugriffstoken.
+        </p>
+
+        <div class="head" style="margin-top:14px">
+          <div class="head-row">
+            <label class="f grow"><span class="lbl">GitHub-Benutzername</span>
+              <input type="text" id="cfg-owner" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
+            <label class="f grow"><span class="lbl">Daten-Repo</span>
+              <input type="text" id="cfg-repo" autocapitalize="none" spellcheck="false" placeholder="ebuxi-daten"></label>
+            <label class="f"><span class="lbl">Branch</span>
+              <input type="text" id="cfg-branch" autocapitalize="none" spellcheck="false" style="width:7em"></label>
+          </div>
+          <label class="f" style="margin-top:10px"><span class="lbl">Zugriffstoken</span>
+            <input type="password" id="cfg-token" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+        </div>
+
+        <p class="hint" id="cfg-status" style="color:var(--ink2)"></p>
+
+        <div class="actionbar">
+          <button class="btn btn-main" id="cfg-pruefen"><b>Verbinden und speichern</b><small>prüft den Zugriff sofort</small></button>
+          <button class="btn" id="cfg-zurueck">Zurück</button>
+          <button class="btn btn-del" id="cfg-loeschen" hidden>Zugang entfernen</button>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <h3>Token erstellen</h3>
+          <ol style="margin:0;padding-left:20px;font-size:14px;color:var(--ink2);line-height:1.6">
+            <li>Auf GitHub: <b>Settings</b> → <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b></li>
+            <li>Bei <b>Repository access</b>: <i>Only select repositories</i> → nur das Daten-Repo auswählen</li>
+            <li>Bei <b>Permissions</b> → <b>Repository permissions</b> → <b>Contents</b> auf <i>Read and write</i> stellen</li>
+            <li>Ablaufdatum setzen, Token erzeugen und hier einfügen</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Sicherheit</h3>
+          <p style="font-size:14px;color:var(--ink2);margin:0">
+            Das Token bleibt nur in diesem Browser auf diesem Gerät und wird ausschliesslich an
+            <b>api.github.com</b> geschickt. Es gilt nur für das eine Repo. Wenn du ein Gerät
+            verlierst, das Token auf GitHub widerrufen und hier ein neues eintragen.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ============================================================
+   eBuxi Fahrtenjournal — Dateien im privaten Daten-Repo
+   fahrten/<JJJJ-MM>.json  { rows: { id: {d,z,s,v,n,b,t,a,m,k,del} } }
+   abos/<JJJJ>.json        { rows: { id: {d,z,s,typ,nr,zahl,del} } }
+   stamm/verweise.json     { strassen[], schichten[], zeitraeume[], top[], tarife{} }
+   bestand/abonr.json      { zehner[], monats[] }
+   Gelesen und geschrieben ueber die GitHub-Contents-API; jede Aenderung
+   ist ein Commit. Eintraege sind nach Id verschluesselt abgelegt, damit
+   zwei Geraete denselben Monat gefahrlos ergaenzen koennen.
+   ============================================================ */
+
+const MON = ["Jan","Febr","März","April","Mai","Juni","Juli","Aug","Sept","Okt","Nov","Dez"];
+const TARIF = { einzelfahrt:4, abo10:35, aboMonat:60 };
+const PAYS = [
+  {k:"b", name:"Bar",               hint:"Einzelfahrt 4.– bar",  cls:"b"},
+  {k:"t", name:"Twint",             hint:"Einzelfahrt 4.– Twint",cls:"t"},
+  {k:"a", name:"10er-Abo",          hint:"Abschnitt abgestempelt",cls:"a"},
+  {k:"m", name:"Jahres-/Monatsabo", hint:"Abo vorgezeigt",       cls:"m"},
+  {k:"k", name:"Kind / gratis",     hint:"keine Zahlung",        cls:"k"}
+];
+const LS = "ebuxi.journal.v1";
+
+const S = {
+  mode:"wait",
+  strassen:[], schichten:["1.1","1.2","1.3","1.4","2.1","2.2","Spez."],
+  zeitraeume:[], top:[],
+  fahrten:{},           // monatKey -> {id:row}
+  abos:{},              // jahr -> {id:row}
+  bestand:{zehner:[],monats:[]},
+  outbox:[],            // ungesendete Schreibvorgänge
+  kopf:{d:heute(), z:"", s:"1.4"},
+  form:{v:"", n:"", b:0,t:0,a:0,m:0,k:0, edit:null},
+  abo:{typ:"10er", nr:"", zahl:"bar", edit:null},
+  loaded:[],            // geladene Monatsschlüssel
+  tab:"fahrt", jSuche:""
+};
+
+/* ---------- kleine Helfer ---------- */
+function heute(){ const t=new Date(); return iso(t); }
+function iso(dt){ return dt.getFullYear()+"-"+p2(dt.getMonth()+1)+"-"+p2(dt.getDate()); }
+function p2(n){ return String(n).padStart(2,"0"); }
+function mk(d){ return d.slice(0,7); }
+function shiftMonth(key, delta){
+  let [y,m] = key.split("-").map(Number); m += delta;
+  while(m<1){ m+=12; y--; } while(m>12){ m-=12; y++; }
+  return y+"-"+p2(m);
+}
+/** Zeitraum-Regel aus der Excel-Mappe: ab dem 16. läuft der Monat mit dem Folgemonat. */
+function zeitraumFor(d){
+  const [ ,m,dd] = d.split("-").map(Number);
+  return dd>=16 ? MON[m-1]+"/"+MON[m%12] : MON[(m+10)%12]+"/"+MON[m-1];
+}
+function fmtDate(d){
+  const [y,m,dd]=d.split("-");
+  return dd+"."+m+"."+y.slice(2);
+}
+function wochentag(d){
+  return ["So","Mo","Di","Mi","Do","Fr","Sa"][new Date(d+"T12:00:00").getDay()];
+}
+function chf(n){ return (Math.round(n*100)/100).toLocaleString("de-CH",{minimumFractionDigits:0,maximumFractionDigits:2})+".–"; }
+function newId(){ return "r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function fold(s){
+  return String(s).toLowerCase()
+    .replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss")
+    .replace(/[^a-z0-9]/g,"");
+}
+function fold2(s){ return fold(s).replace(/ae/g,"a").replace(/oe/g,"o").replace(/ue/g,"u"); }
+function el(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function alleFahrten(){
+  const out=[];
+  for(const key of Object.keys(S.fahrten))
+    for(const [id,r] of Object.entries(S.fahrten[key]))
+      if(r && !r.del) out.push({id, key, ...r});
+  return out;
+}
+function alleAbos(){
+  const out=[];
+  for(const y of Object.keys(S.abos))
+    for(const [id,r] of Object.entries(S.abos[y]))
+      if(r && !r.del) out.push({id, y, ...r});
+  return out;
+}
+function pax(r){ return (r.b||0)+(r.t||0)+(r.a||0)+(r.m||0)+(r.k||0); }
+
+/* ---------- lokaler Zwischenspeicher ---------- */
+function cacheSave(){
+  try{
+    localStorage.setItem(LS, JSON.stringify({
+      fahrten:S.fahrten, abos:S.abos, bestand:S.bestand, outbox:S.outbox,
+      kopf:S.kopf, loaded:S.loaded,
+      stamm:{strassen:S.strassen, schichten:S.schichten, zeitraeume:S.zeitraeume, top:S.top}
+    }));
+  }catch(e){/* Speicher voll oder blockiert – die Cloud bleibt die Wahrheit */}
+}
+function cacheLoad(){
+  try{
+    const raw = localStorage.getItem(LS); if(!raw) return;
+    const c = JSON.parse(raw);
+    if(c.fahrten) S.fahrten=c.fahrten;
+    if(c.abos) S.abos=c.abos;
+    if(c.bestand) S.bestand=c.bestand;
+    if(Array.isArray(c.outbox)) S.outbox=c.outbox;
+    if(Array.isArray(c.loaded)) S.loaded=c.loaded;
+    if(c.stamm){
+      if(c.stamm.strassen&&c.stamm.strassen.length) S.strassen=c.stamm.strassen;
+      if(c.stamm.schichten&&c.stamm.schichten.length) S.schichten=c.stamm.schichten;
+      if(c.stamm.zeitraeume&&c.stamm.zeitraeume.length) S.zeitraeume=c.stamm.zeitraeume;
+      if(c.stamm.top) S.top=c.stamm.top;
+    }
+    if(c.kopf){
+      S.kopf = c.kopf;
+      if(S.kopf.d !== heute()){ S.kopf.d = heute(); S.kopf.z = zeitraumFor(S.kopf.d); }
+    }
+  }catch(e){/* beschädigter Zwischenspeicher wird ignoriert */}
+}
+
+/* ---------- Speicher: privates GitHub-Repo ---------- */
+const CFGKEY = "ebuxi.github.v1";
+
+const Store = {
+  cfg:{owner:"", repo:"", branch:"main", token:""},
+  etags:{},
+  laden(){
+    try{ const r=localStorage.getItem(CFGKEY); if(r) this.cfg=Object.assign(this.cfg, JSON.parse(r)); }catch(e){}
+    return this;
+  },
+  sichern(){ try{ localStorage.setItem(CFGKEY, JSON.stringify(this.cfg)); }catch(e){} },
+  loeschen(){
+    try{ localStorage.removeItem(CFGKEY); }catch(e){}
+    this.cfg={owner:"", repo:"", branch:"main", token:""}; this.etags={};
+  },
+  bereit(){ return !!(this.cfg.owner && this.cfg.repo && this.cfg.token); },
+  basis(){
+    return "https://api.github.com/repos/"+encodeURIComponent(this.cfg.owner)+"/"+encodeURIComponent(this.cfg.repo);
+  },
+  kopf(extra){
+    return Object.assign({
+      "Accept":"application/vnd.github+json",
+      "Authorization":"Bearer "+this.cfg.token,
+      "X-GitHub-Api-Version":"2022-11-28"
+    }, extra||{});
+  },
+  /** Prueft, ob das Repo mit diesem Token ueberhaupt erreichbar ist. */
+  async pruefeRepo(){
+    let a;
+    try{ a = await fetch(this.basis(), {headers:this.kopf(), cache:"no-store"}); }
+    catch(e){ return "offline"; }
+    if(a.ok) return "ok";
+    if(a.status===404) return "nicht-gefunden";
+    if(a.status===401) return "token-ungueltig";
+    if(a.status===403) return "verboten";
+    return "fehler";
+  },
+  async hole(pfad, mitEtag){
+    if(!this.bereit()) return {status:"nicht-eingerichtet"};
+    const h = this.kopf();
+    if(mitEtag && this.etags[pfad]) h["If-None-Match"] = this.etags[pfad];
+    let a;
+    try{
+      a = await fetch(this.basis()+"/contents/"+pfad+"?ref="+encodeURIComponent(this.cfg.branch),
+                      {headers:h, cache:"no-store"});
+    }catch(e){ return {status:"offline"}; }
+    if(a.status===304) return {status:"unveraendert"};
+    if(a.status===404) return {status:"fehlt"};
+    if(a.status===401 || a.status===403) return {status:"kein-zugriff", code:a.status};
+    if(!a.ok) return {status:"fehler", code:a.status};
+    const et = a.headers.get("ETag"); if(et) this.etags[pfad] = et;
+    try{
+      const j = await a.json();
+      return {status:"ok", sha:j.sha, daten: JSON.parse(vonB64(j.content||""))};
+    }catch(e){ return {status:"fehler"}; }
+  },
+  async lege(pfad, obj, sha, nachricht){
+    if(!this.bereit()) return {status:"nicht-eingerichtet"};
+    const koerper = {message:nachricht, content:nachB64(JSON.stringify(obj, null, 1)), branch:this.cfg.branch};
+    if(sha) koerper.sha = sha;
+    let a;
+    try{
+      a = await fetch(this.basis()+"/contents/"+pfad,
+        {method:"PUT", headers:this.kopf({"Content-Type":"application/json"}), body:JSON.stringify(koerper)});
+    }catch(e){ return {status:"offline"}; }
+    if(a.status===409 || a.status===422) return {status:"konflikt"};
+    if(a.status===401 || a.status===403) return {status:"kein-zugriff", code:a.status};
+    if(!a.ok) return {status:"fehler", code:a.status};
+    delete this.etags[pfad];
+    return {status:"ok"};
+  },
+  /** Datei lesen, aendern(rows) anwenden, zurueckschreiben; bei Konflikt mit frischem Stand erneut. */
+  async verschmelze(pfad, aendern, nachricht){
+    for(let i=0;i<4;i++){
+      const g = await this.hole(pfad, false);
+      if(["offline","kein-zugriff","fehler","nicht-eingerichtet"].includes(g.status)) return g;
+      const doc = (g.status==="fehlt" || !g.daten) ? {rows:{}} : g.daten;
+      if(!doc.rows) doc.rows = {};
+      aendern(doc.rows);
+      const p = await this.lege(pfad, doc, g.sha, nachricht);
+      if(p.status==="konflikt") continue;
+      return p;
+    }
+    return {status:"konflikt"};
+  }
+};
+
+function nachB64(s){
+  const b = new TextEncoder().encode(s);
+  let bin="", N=0x8000;
+  for(let i=0;i<b.length;i+=N) bin += String.fromCharCode.apply(null, b.subarray(i, i+N));
+  return btoa(bin);
+}
+function vonB64(s){
+  const bin = atob(String(s).replace(/\s+/g,""));
+  const b = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) b[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(b);
+}
+
+function setSync(mode, text){
+  S.mode = mode;
+  const n = el("sync");
+  n.className = "sync is-"+mode;
+  n.querySelector("span").textContent = text;
+}
+function syncText(){
+  const off = S.outbox.length;
+  if(!Store.bereit()) setSync("local", off? off+" nur lokal" : "nicht eingerichtet");
+  else if(off) setSync("wait", off+(off===1? " wartet":" warten"));
+  else setSync("cloud","synchron");
+}
+
+/** Legt noch nicht gesendete Eintraege wieder ueber frisch geladene Daten. */
+function outboxUeberlagern(){
+  for(const j of S.outbox){
+    let m = j.path.match(/^fahrten\/(.+)\.json$/);
+    if(m){ S.fahrten[m[1]] = Object.assign({}, S.fahrten[m[1]]||{}, {[j.id]: j.row}); continue; }
+    m = j.path.match(/^abos\/(.+)\.json$/);
+    if(m){ S.abos[m[1]] = Object.assign({}, S.abos[m[1]]||{}, {[j.id]: j.row}); }
+  }
+}
+
+async function ladeStamm(){
+  const g = await Store.hole("stamm/verweise.json", false);
+  if(g.status==="ok" && g.daten){
+    const d = g.daten;
+    if(Array.isArray(d.strassen)) S.strassen = d.strassen;
+    if(Array.isArray(d.schichten) && d.schichten.length) S.schichten = d.schichten;
+    if(Array.isArray(d.zeitraeume) && d.zeitraeume.length) S.zeitraeume = d.zeitraeume;
+    if(Array.isArray(d.top)) S.top = d.top;
+    cacheSave();
+  }
+  return g.status;
+}
+async function ladeBestand(){
+  const g = await Store.hole("bestand/abonr.json", false);
+  if(g.status==="ok" && g.daten){
+    S.bestand = {zehner:g.daten.zehner||[], monats:g.daten.monats||[]};
+    cacheSave();
+  }
+}
+async function ladeMonat(key, mitEtag){
+  const g = await Store.hole("fahrten/"+key+".json", !!mitEtag);
+  if(g.status==="ok") S.fahrten[key] = (g.daten && g.daten.rows) || {};
+  else if(g.status==="fehlt") S.fahrten[key] = S.fahrten[key] || {};
+  if(!S.loaded.includes(key)) S.loaded.push(key);
+  outboxUeberlagern(); cacheSave();
+  return g.status;
+}
+async function ladeAbos(jahr, mitEtag){
+  const g = await Store.hole("abos/"+jahr+".json", !!mitEtag);
+  if(g.status==="ok") S.abos[jahr] = (g.daten && g.daten.rows) || {};
+  else if(g.status==="fehlt") S.abos[jahr] = S.abos[jahr] || {};
+  outboxUeberlagern(); cacheSave();
+  return g.status;
+}
+
+async function initStore(){
+  Store.laden(); renderSetup();
+  if(!Store.bereit()){ setSync("local","nicht eingerichtet"); tabWechsel("setup"); renderAll(); return; }
+  setSync("wait","lade …");
+  const st = await ladeStamm();
+  if(st==="kein-zugriff" || st==="fehler"){
+    setSync("local","Zugang prüfen");
+    tabWechsel("setup");
+    setupStatus("GitHub verweigert den Zugriff. Bitte Token und Repo prüfen.", false);
+    renderAll(); return;
+  }
+  await ladeBestand();
+  const hk = mk(heute());
+  for(const k of [shiftMonth(hk,-1), hk, shiftMonth(hk,1)]) await ladeMonat(k);
+  const jahr = Number(heute().slice(0,4));
+  for(const y of [jahr-1, jahr]) await ladeAbos(String(y));
+  renderAll(); syncText(); flush();
+}
+
+async function schreibe(job){
+  S.outbox.push(job); cacheSave(); syncText();
+  await flush();
+}
+let flushing = false;
+async function flush(){
+  if(flushing || !Store.bereit() || !S.outbox.length) return;
+  flushing = true; syncText();
+  while(S.outbox.length){
+    const pfad = S.outbox[0].path;
+    const gruppe = S.outbox.filter(j=>j.path===pfad);
+    const r = await Store.verschmelze(pfad, rows=>{ for(const j of gruppe) rows[j.id] = j.row; },
+      "eBuxi: "+gruppe.length+(gruppe.length===1? " Eintrag":" Einträge")+" – "+pfad);
+    if(r.status!=="ok"){
+      flushing = false;
+      if(r.status==="kein-zugriff") setSync("local","Zugang prüfen"); else syncText();
+      return;
+    }
+    S.outbox = S.outbox.filter(j=>j.path!==pfad);
+    cacheSave(); renderSchicht();
+  }
+  flushing = false; syncText();
+}
+setInterval(()=>{ if(S.outbox.length) flush(); }, 20000);
+window.addEventListener("online", flush);
+
+/** Holt laufenden und vorigen Monat neu, falls ein anderes Geraet geschrieben hat. */
+async function pollen(){
+  if(!Store.bereit() || document.hidden || S.outbox.length || flushing) return;
+  let neu = false;
+  const hk = mk(heute());
+  for(const k of [shiftMonth(hk,-1), hk]){
+    const vorher = JSON.stringify(S.fahrten[k]||{});
+    const st = await ladeMonat(k, true);
+    if(st==="ok" && JSON.stringify(S.fahrten[k]||{})!==vorher) neu = true;
+  }
+  if(neu) renderAll();
+}
+setInterval(pollen, 60000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ flush(); pollen(); } });
+
+async function bestandSchreiben(next){
+  S.bestand = next; cacheSave();
+  if(!Store.bereit()) return;
+  const g = await Store.hole("bestand/abonr.json", false);
+  if(g.status==="offline" || g.status==="kein-zugriff") return;
+  await Store.lege("bestand/abonr.json", next, g.sha, "eBuxi: Abo-Bestand aktualisiert");
+}
+
+/* ---------- Einrichtung ---------- */
+function setupStatus(text, ok){
+  const n = el("cfg-status");
+  n.textContent = text;
+  n.style.color = ok===true? "var(--ok)" : ok===false? "var(--warn)" : "var(--ink2)";
+}
+function renderSetup(){
+  el("cfg-owner").value  = Store.cfg.owner || "";
+  el("cfg-repo").value   = Store.cfg.repo || "";
+  el("cfg-branch").value = Store.cfg.branch || "main";
+  el("cfg-token").placeholder = Store.cfg.token
+    ? "gespeichert – nur ausfüllen, wenn du das Token wechselst"
+    : "github_pat_…";
+  el("cfg-loeschen").hidden = !Store.cfg.token;
+}
+
+/* ---------- Meldungen ---------- */
+let toastTimer=null;
+function meldung(text){
+  let t = document.querySelector(".toast");
+  if(!t){ t=document.createElement("div"); t.className="toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
+  t.textContent = text;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.remove(), 2600);
+}
+
+/* ============================================================
+   Auswahl-Overlay für Strassen
+   ============================================================ */
+function strassenWahl(titel, aktuell, cb){
+  const sheet = document.createElement("div");
+  sheet.className="sheet";
+  sheet.innerHTML =
+    '<div class="sheet-top">'+
+      '<input type="text" id="sh-q" placeholder="'+esc(titel)+' suchen…" autocomplete="off" enterkeyhint="done">'+
+      '<button class="btn" id="sh-x">Zurück</button>'+
+    '</div><div class="sheet-body" id="sh-body"></div>';
+  document.body.appendChild(sheet);
+  const q = sheet.querySelector("#sh-q"), body = sheet.querySelector("#sh-body");
+
+  const zuletzt = [];
+  for(const r of alleFahrten().sort((x,y)=> (y.ts||0)-(x.ts||0)).slice(0,40)){
+    for(const s of [r.v, r.n]) if(s && !zuletzt.includes(s) && zuletzt.length<8) zuletzt.push(s);
+  }
+  function liste(){
+    const term = q.value.trim();
+    const f1 = fold(term), f2 = fold2(term);
+    let html = "";
+    if(!term){
+      const häufig = (S.top&&S.top.length? S.top : S.strassen).slice(0,10);
+      if(zuletzt.length) html += '<p class="lbl sheet-sec">Zuletzt benutzt</p>'+zuletzt.map(opt).join("");
+      html += '<p class="lbl sheet-sec">Häufigste Haltepunkte</p>'+häufig.map(opt).join("");
+      html += '<p class="lbl sheet-sec">Alle '+S.strassen.length+' Strassen</p>'+S.strassen.map(opt).join("");
+      if(!S.strassen.length) html += '<p class="empty">Keine Strassenliste geladen. Tippe den Namen ein und übernimm ihn.</p>';
+    }else{
+      const treffer = S.strassen.filter(s=>{
+        const a=fold(s), b=fold2(s);
+        return a.includes(f1)||b.includes(f2)||a.includes(f2)||b.includes(f1);
+      });
+      html = treffer.length
+        ? treffer.map(opt).join("")
+        : '<p class="empty">Keine Strasse gefunden. «'+esc(term)+'» als neuen Haltepunkt übernehmen?</p>'+
+          '<button class="opt hit" data-neu="1">'+esc(term)+' übernehmen</button>';
+    }
+    body.innerHTML = html;
+  }
+  function opt(s){
+    return '<button class="opt'+(s===aktuell?" hit":"")+'" data-s="'+esc(s)+'">'+esc(s)+'</button>';
+  }
+  function zu(){ sheet.remove(); document.removeEventListener("keydown", onKey); }
+  function onKey(e){ if(e.key==="Escape") zu(); }
+
+  liste();
+  q.addEventListener("input", liste);
+  q.addEventListener("keydown", e=>{
+    if(e.key!=="Enter") return;
+    const first = body.querySelector(".opt");
+    if(first) first.click();
+  });
+  body.addEventListener("click", e=>{
+    const b = e.target.closest(".opt"); if(!b) return;
+    cb(b.dataset.neu ? q.value.trim() : b.dataset.s);
+    zu();
+  });
+  sheet.querySelector("#sh-x").addEventListener("click", zu);
+  document.addEventListener("keydown", onKey);
+  setTimeout(()=>q.focus(), 30);
+}
+
+/* ============================================================
+   Darstellung
+   ============================================================ */
+function renderAll(){
+  renderKopf(); renderFahrt(); renderAbo(); renderJournal(); renderTabCounts();
+}
+
+function renderKopf(){
+  el("datum").value = S.kopf.d;
+  el("a-datum").value = S.kopf.d;
+  const zr = S.zeitraeume.length? S.zeitraeume : [zeitraumFor(S.kopf.d)];
+  const auto = zeitraumFor(S.kopf.d);
+  if(!S.kopf.z) S.kopf.z = zr.includes(auto)? auto : zr[0];
+  const opts = zr.map(z=>'<option'+(z===S.kopf.z?" selected":"")+'>'+esc(z)+"</option>").join("");
+  el("zeitraum").innerHTML = opts;
+  el("a-zeitraum").innerHTML = opts;
+  const chips = S.schichten.map(s=>
+    '<button class="chip" data-s="'+esc(s)+'" aria-pressed="'+(s===S.kopf.s)+'">'+esc(s)+"</button>").join("");
+  el("schichten").innerHTML = chips;
+  el("a-schichten").innerHTML = chips;
+}
+
+function renderFahrt(){
+  const f = S.form;
+  for(const id of ["von","nach"]){
+    const b = el(id), wert = id==="von"? f.v : f.n;
+    b.classList.toggle("empty", !wert);
+    b.querySelector("span").textContent = wert || "Strasse wählen";
+  }
+  // Schnellwahl: häufigste Haltepunkte
+  const häufig = (S.top&&S.top.length? S.top : S.strassen).slice(0,6);
+  el("quick").innerHTML = häufig.map(s=>
+    '<button class="chip mini" data-q="'+esc(s)+'">'+esc(s)+"</button>").join("")
+    + (S.strassen.length? '<button class="chip mini" data-q="*">alle …</button>' : "");
+
+  el("pays").innerHTML = PAYS.map(p=>
+    '<div class="pay'+(f[p.k]?" on":"")+'">'+
+      '<span class="dot" style="background:var(--'+({b:"bar",t:"twint",a:"abo",m:"abo",k:"gratis"})[p.k]+')"></span>'+
+      '<div class="pay-t"><b>'+esc(p.name)+'</b><small>'+esc(p.hint)+'</small></div>'+
+      '<div class="step">'+
+        '<button data-pm="-" data-k="'+p.k+'" aria-label="'+esc(p.name)+' weniger"'+(f[p.k]?"":" disabled")+'>−</button>'+
+        '<output class="num" aria-label="'+esc(p.name)+'">'+f[p.k]+'</output>'+
+        '<button data-pm="+" data-k="'+p.k+'" aria-label="'+esc(p.name)+' mehr">+</button>'+
+      '</div>'+
+    '</div>').join("")
+    + '<div class="paysum"><span class="lbl">Passagiere</span><b class="num">'+summe()+'</b>'+
+      '<small>Bar '+chf((f.b||0)*TARIF.einzelfahrt)+' · Twint '+chf((f.t||0)*TARIF.einzelfahrt)+'</small></div>';
+
+  const ok = f.v && f.n && summe()>0 && f.v!==f.n;
+  const btn = el("save");
+  btn.disabled = !ok;
+  btn.querySelector("b").textContent = f.edit? "Änderung speichern" : "Fahrt speichern";
+  el("save-sub").textContent = !f.v||!f.n ? "Abholung und Ziel wählen"
+    : f.v===f.n ? "Abholung und Ziel sind gleich"
+    : summe()===0 ? "mindestens 1 Passagier"
+    : summe()+(summe()===1?" Passagier":" Passagiere")+" · "+chf(((f.b||0)+(f.t||0))*TARIF.einzelfahrt);
+  el("delete").hidden = !f.edit;
+  el("reset").textContent = f.edit? "Abbrechen" : "Leeren";
+
+  renderSchicht(); renderZeitraum();
+}
+function summe(){ const f=S.form; return (f.b|0)+(f.t|0)+(f.a|0)+(f.m|0)+(f.k|0); }
+
+function paxPills(r){
+  return PAYS.filter(p=>r[p.k]).map(p=>'<span class="pill '+p.cls+'" title="'+esc(p.name)+'">'+r[p.k]+"</span>").join("");
+}
+
+function renderSchicht(){
+  const rows = alleFahrten()
+    .filter(r=> r.d===S.kopf.d && String(r.s)===String(S.kopf.s))
+    .sort((a,b)=> (b.ts||0)-(a.ts||0));
+  el("shift-title").textContent = "Schicht "+S.kopf.s+" · "+wochentag(S.kopf.d)+" "+fmtDate(S.kopf.d);
+  const t = {b:0,t:0,a:0,m:0,k:0};
+  rows.forEach(r=>PAYS.forEach(p=>t[p.k]+=(r[p.k]||0)));
+  const total = PAYS.reduce((s,p)=>s+t[p.k],0);
+  el("shift-sum").innerHTML =
+    '<div><b class="num">'+rows.length+'</b><small>Fahrten</small></div>'+
+    '<div><b class="num">'+total+'</b><small>Passagiere</small></div>'+
+    '<div><b class="num">'+chf((t.b)*TARIF.einzelfahrt)+'</b><small>Bar</small></div>'+
+    '<div><b class="num">'+chf((t.t)*TARIF.einzelfahrt)+'</b><small>Twint</small></div>';
+  el("shift-rows").innerHTML = rows.length
+    ? rows.map(r=>
+        '<button class="row" data-edit="'+r.id+'" data-key="'+r.key+'">'+
+          '<span class="strecke">'+esc(r.v)+' <i>→</i> '+esc(r.n)+'</span>'+
+          '<span class="pax">'+paxPills(r)+'</span>'+
+          '<span class="meta">'+(S.outbox.some(j=>j.id===r.id)? '<span class="flag">wartet</span>' : "ändern")+'</span>'+
+        "</button>").join("")
+    : '<p class="empty">Noch keine Fahrt auf dieser Schicht.</p>';
+}
+
+function renderZeitraum(){
+  const z = S.kopf.z;
+  const rows = alleFahrten().filter(r=> r.z===z);
+  const abos = alleAbos().filter(r=> r.z===z);
+  el("per-title").textContent = "Zeitraum "+z;
+  const t={b:0,t:0,a:0,m:0,k:0};
+  rows.forEach(r=>PAYS.forEach(p=>t[p.k]+=(r[p.k]||0)));
+  const tage = new Set(rows.map(r=>r.d)).size;
+  el("per-sum").innerHTML =
+    '<div><b class="num">'+tage+'</b><small>Tage</small></div>'+
+    '<div><b class="num">'+rows.length+'</b><small>Fahrten</small></div>'+
+    '<div><b class="num">'+PAYS.reduce((s,p)=>s+t[p.k],0)+'</b><small>Passagiere</small></div>';
+  const a10bar = abos.filter(a=>a.typ==="10er"&&a.zahl==="bar").length;
+  const aMbar  = abos.filter(a=>a.typ==="M"&&a.zahl==="bar").length;
+  const aTwint = abos.filter(a=>a.zahl==="twint");
+  const barEF = t.b*TARIF.einzelfahrt;
+  const barAbo = a10bar*TARIF.abo10 + aMbar*TARIF.aboMonat;
+  el("per-money").innerHTML =
+    zeile("Einzelfahrten bar", t.b+" × 4.–", chf(barEF))+
+    zeile("Einzelfahrten Twint", t.t+" × 4.–", chf(t.t*TARIF.einzelfahrt))+
+    zeile("Abos bar", a10bar+" × 35.– / "+aMbar+" × 60.–", chf(barAbo))+
+    zeile("Abos Twint", aTwint.length+" Stk.", chf(aTwint.reduce((s,a)=>s+(a.typ==="M"?TARIF.aboMonat:TARIF.abo10),0)))+
+    zeile("<b>Bar total</b>", "", "<b>"+chf(barEF+barAbo)+"</b>")+
+    '<p class="note">Abo-Fahrten: '+t.a+' × 10er-Abschnitt, '+t.m+' × Monats-/Jahresabo, '+t.k+' × gratis.</p>';
+}
+function zeile(a,b,c){
+  return '<div class="money"><span>'+a+(b?' <span style="color:var(--ink3)">'+b+"</span>":"")+"</span><b>"+c+"</b></div>";
+}
+
+function renderAbo(){
+  const a = S.abo;
+  el("a-typ").querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed", String(c.dataset.typ===a.typ)));
+  el("a-zahl").querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed", String(c.dataset.zahl===a.zahl)));
+  const frei = a.typ==="10er" ? S.bestand.zehner : S.bestand.monats;
+  const manuell = el("a-nr-manuell");
+  if(!manuell.hidden){
+    a.nr = manuell.value.trim();
+  }else{
+    if(!frei.includes(a.nr)) a.nr = frei[0] || "";
+    el("a-nr").innerHTML = frei.length
+      ? frei.map(n=>'<option'+(n===a.nr?" selected":"")+">"+esc(n)+"</option>").join("")
+      : '<option value="">— keine freie Nummer —</option>';
+    el("a-nr").disabled = !frei.length;
+  }
+  el("a-bestand").innerHTML =
+    '<div><b class="num">'+S.bestand.zehner.length+'</b><small>10er frei</small></div>'+
+    '<div><b class="num">'+S.bestand.monats.length+'</b><small>Monats frei</small></div>';
+  const preis = a.typ==="M"? TARIF.aboMonat : TARIF.abo10;
+  el("a-save-sub").textContent = (a.typ==="M"?"Monatsabo":"10er-Abo")+" · "+chf(preis)+" · "+(a.zahl==="twint"?"Twint":"bar")+(a.nr? " · Nr "+a.nr : "");
+  el("a-save").querySelector("b").textContent = a.edit? "Änderung speichern" : "Abo speichern";
+  el("a-delete").hidden = !a.edit;
+  el("a-hint").textContent = (!a.nr && !frei.length) ? "Keine freie Nummer im Bestand – mit «Andere Nr…» erfassen." : "";
+
+  const list = alleAbos().filter(r=>r.z===S.kopf.z).sort((x,y)=> x.d<y.d?1:-1);
+  el("a-list-title").textContent = "Abos im Zeitraum "+S.kopf.z;
+  el("a-rows").innerHTML = list.length
+    ? list.map(r=>
+        '<button class="row" data-aedit="'+r.id+'" data-y="'+r.y+'">'+
+          '<span class="strecke">'+(r.typ==="M"?"Monatsabo":"10er-Abo")+' <i>·</i> '+esc(r.nr||"ohne Nr")+"</span>"+
+          '<span class="pax"><span class="pill '+(r.zahl==="twint"?"t":"b")+'">'+(r.zahl==="twint"?"Twint":"Bar")+"</span></span>"+
+          '<span class="meta">'+fmtDate(r.d)+"</span>"+
+        "</button>").join("")
+    : '<p class="empty">In diesem Zeitraum noch kein Abo verkauft.</p>';
+  const bar = list.filter(r=>r.zahl==="bar").reduce((s,r)=>s+(r.typ==="M"?TARIF.aboMonat:TARIF.abo10),0);
+  const tw  = list.filter(r=>r.zahl==="twint").reduce((s,r)=>s+(r.typ==="M"?TARIF.aboMonat:TARIF.abo10),0);
+  el("a-money").innerHTML = list.length? zeile("Bar","",chf(bar))+zeile("Twint","",chf(tw)) : "";
+}
+
+function renderJournal(){
+  const term = S.jSuche.trim(), f1=fold(term);
+  let rows = alleFahrten();
+  if(term){
+    rows = rows.filter(r=>
+      fold(r.v).includes(f1)||fold(r.n).includes(f1)||fold2(r.v).includes(fold2(term))||fold2(r.n).includes(fold2(term))||
+      r.d.includes(term)||fmtDate(r.d).includes(term)||String(r.s)===term||fold(r.z).includes(f1));
+  }
+  rows.sort((a,b)=> a.d<b.d?1:a.d>b.d?-1:(b.ts||0)-(a.ts||0));
+  const tage = [];
+  for(const r of rows){
+    const key = r.d+"|"+r.s;
+    let g = tage.find(x=>x.key===key);
+    if(!g){ g={key,d:r.d,s:r.s,rows:[]}; tage.push(g); }
+    g.rows.push(r);
+  }
+  const geladen = S.loaded.slice().sort();
+  let html = '<p class="note">Geladen: '+(geladen.length? geladen[0]+" bis "+geladen[geladen.length-1] : "—")+
+    " · "+alleFahrten().length+" Fahrten. Ältere Monate liegen im Daten-Repo und lassen sich nachladen.</p>";
+  if(!tage.length) html += '<p class="empty">Keine Fahrten gefunden.</p>';
+  for(const g of tage.slice(0,60)){
+    const t={b:0,t:0,a:0,m:0,k:0};
+    g.rows.forEach(r=>PAYS.forEach(p=>t[p.k]+=(r[p.k]||0)));
+    html += '<div class="card" style="margin-top:12px">'+
+      '<h3>'+wochentag(g.d)+" "+fmtDate(g.d)+' <span class="lbl" style="font-family:inherit">Schicht '+esc(g.s)+" · "+
+        g.rows.length+" Fahrten · "+PAYS.reduce((s,p)=>s+t[p.k],0)+" Passagiere · Bar "+chf(t.b*TARIF.einzelfahrt)+"</span></h3>"+
+      '<div class="rows">'+g.rows.map(r=>
+        '<button class="row" data-edit="'+r.id+'" data-key="'+r.key+'" data-jump="1">'+
+          '<span class="strecke">'+esc(r.v)+' <i>→</i> '+esc(r.n)+"</span>"+
+          '<span class="pax">'+paxPills(r)+"</span>"+
+          '<span class="meta">ändern</span>'+
+        "</button>").join("")+"</div></div>";
+  }
+  el("j-body").innerHTML = html;
+}
+
+function renderTabCounts(){
+  const heuteRows = alleFahrten().filter(r=>r.d===S.kopf.d);
+  el("tc-fahrt").textContent = heuteRows.length? heuteRows.length+" heute" : "erfassen";
+  el("tc-abo").textContent = S.bestand.zehner.length+S.bestand.monats.length ? (S.bestand.zehner.length+S.bestand.monats.length)+" Nr frei" : "verkaufen";
+  el("tc-journal").textContent = alleFahrten().length+" Fahrten";
+}
+
+/* ============================================================
+   Bedienung
+   ============================================================ */
+function tabWechsel(name){
+  S.tab = name;
+  for(const n of ["fahrt","abo","journal","setup"]){
+    const t = el("tab-"+n);
+    if(t) t.setAttribute("aria-selected", String(n===name));
+    el("pane-"+n).hidden = n!==name;
+  }
+}
+["fahrt","abo","journal"].forEach(n=> el("tab-"+n).addEventListener("click", ()=>tabWechsel(n)));
+el("sync").addEventListener("click", ()=> tabWechsel(S.tab==="setup"? "fahrt" : "setup"));
+el("cfg-zurueck").addEventListener("click", ()=> tabWechsel("fahrt"));
+
+el("cfg-pruefen").addEventListener("click", async ()=>{
+  const owner  = el("cfg-owner").value.trim();
+  const repo   = el("cfg-repo").value.trim();
+  const branch = el("cfg-branch").value.trim() || "main";
+  const token  = el("cfg-token").value.trim() || Store.cfg.token;
+  if(!owner || !repo || !token){ setupStatus("Bitte Benutzername, Repo und Token ausfüllen.", false); return; }
+  const alt = Object.assign({}, Store.cfg);
+  Store.cfg = {owner, repo, branch, token}; Store.etags = {};
+  setupStatus("prüfe Verbindung …", null);
+  const g = await Store.hole("stamm/verweise.json", false);
+  if(g.status==="ok"){
+    Store.sichern();
+    el("cfg-token").value = "";
+    setupStatus("Verbindung steht. Daten werden geladen …", true);
+    renderSetup();
+    await initStore();
+    tabWechsel("fahrt");
+    meldung("Zugang gespeichert");
+    return;
+  }
+  let txt;
+  if(g.status==="fehlt"){
+    const r = await Store.pruefeRepo();
+    txt = r==="ok"
+      ? "Repo erreichbar, aber die Datei stamm/verweise.json fehlt. Sind die Daten schon hochgeladen?"
+      : r==="nicht-gefunden"
+        ? "Repo nicht gefunden. Name prüfen – oder das Token hat keinen Zugriff auf genau dieses Repo."
+        : r==="token-ungueltig" ? "Token ungültig oder abgelaufen."
+        : r==="verboten" ? "Token hat zu wenig Rechte. «Contents» muss auf «Read and write» stehen."
+        : r==="offline" ? "Keine Internetverbindung." : "GitHub antwortet mit einem Fehler.";
+  }else{
+    txt = g.status==="kein-zugriff" ? "Token hat keinen Zugriff. Rechte und Repo-Auswahl prüfen."
+        : g.status==="offline" ? "Keine Internetverbindung."
+        : "GitHub antwortet mit einem Fehler ("+(g.code||"?")+").";
+  }
+  Store.cfg = alt;
+  setupStatus(txt, false);
+});
+el("cfg-loeschen").addEventListener("click", ()=>{
+  Store.loeschen(); renderSetup(); syncText();
+  setupStatus("Zugang von diesem Gerät entfernt. Die Fahrten bleiben im Repo.", true);
+});
+
+el("datum").addEventListener("change", e=>{
+  S.kopf.d = e.target.value || heute();
+  const auto = zeitraumFor(S.kopf.d);
+  if(S.zeitraeume.includes(auto) || !S.zeitraeume.length) S.kopf.z = auto;
+  cacheSave(); renderKopf(); renderFahrt(); renderAbo(); renderTabCounts();
+});
+el("a-datum").addEventListener("change", e=>{
+  S.kopf.d = e.target.value || heute();
+  const auto = zeitraumFor(S.kopf.d);
+  if(S.zeitraeume.includes(auto) || !S.zeitraeume.length) S.kopf.z = auto;
+  cacheSave(); renderKopf(); renderFahrt(); renderAbo();
+});
+for(const id of ["zeitraum","a-zeitraum"]) el(id).addEventListener("change", e=>{
+  S.kopf.z = e.target.value; cacheSave(); renderKopf(); renderFahrt(); renderAbo();
+});
+for(const id of ["schichten","a-schichten"]) el(id).addEventListener("click", e=>{
+  const c = e.target.closest(".chip"); if(!c) return;
+  S.kopf.s = c.dataset.s; cacheSave(); renderKopf(); renderFahrt(); renderAbo();
+});
+
+el("von").addEventListener("click", ()=> strassenWahl("Abholung", S.form.v, s=>{ S.form.v=s; renderFahrt(); }));
+el("nach").addEventListener("click", ()=> strassenWahl("Ziel", S.form.n, s=>{ S.form.n=s; renderFahrt(); }));
+el("swap").addEventListener("click", ()=>{ const v=S.form.v; S.form.v=S.form.n; S.form.n=v; renderFahrt(); });
+el("quick").addEventListener("click", e=>{
+  const b = e.target.closest("[data-q]"); if(!b) return;
+  const wert = b.dataset.q;
+  if(wert==="*"){ strassenWahl(S.form.v?"Ziel":"Abholung", "", s=>{ if(S.form.v) S.form.n=s; else S.form.v=s; renderFahrt(); }); return; }
+  if(!S.form.v) S.form.v = wert; else if(!S.form.n) S.form.n = wert; else S.form.n = wert;
+  renderFahrt();
+});
+el("pays").addEventListener("click", e=>{
+  const b = e.target.closest("[data-pm]"); if(!b) return;
+  const k = b.dataset.k;
+  S.form[k] = Math.max(0, Math.min(99, (S.form[k]|0) + (b.dataset.pm==="+"?1:-1)));
+  renderFahrt();
+});
+
+function formLeeren(){
+  S.form = {v:"", n:"", b:0,t:0,a:0,m:0,k:0, edit:null};
+  renderFahrt();
+}
+el("reset").addEventListener("click", formLeeren);
+
+el("save").addEventListener("click", async ()=>{
+  const f = S.form;
+  if(!f.v||!f.n||summe()<1||f.v===f.n) return;
+  const row = {d:S.kopf.d, z:S.kopf.z, s:String(S.kopf.s), v:f.v, n:f.n, ts:Date.now()};
+  for(const p of PAYS) if(f[p.k]) row[p.k] = f[p.k]|0;
+  const key = mk(row.d);
+  let id = f.edit;
+  if(id){
+    // Beim Ändern alle Zahlarten mitschreiben, damit Nullen wirklich Null werden
+    for(const p of PAYS) row[p.k] = f[p.k]|0;
+    const alt = (S.fahrten[f.editKey]||{})[id];
+    if(alt) row.ts = alt.ts || row.ts;
+    if(f.editKey && f.editKey!==key){
+      await schreibe({path:"fahrten/"+f.editKey+".json", id, row:{...alt, del:1}});
+      S.fahrten[f.editKey] = {...(S.fahrten[f.editKey]||{}), [id]:{...alt, del:1}};
+      id = newId();
+    }
+  }else{
+    id = newId();
+  }
+  S.fahrten[key] = {...(S.fahrten[key]||{}), [id]: row};
+  if(!S.loaded.includes(key)) S.loaded.push(key);
+  cacheSave();
+  meldung(f.edit? "Fahrt geändert" : summe()+(summe()===1?" Passagier":" Passagiere")+" gespeichert");
+  formLeeren();
+  renderAll();
+  await schreibe({path:"fahrten/"+key+".json", id, row});
+});
+
+el("delete").addEventListener("click", async ()=>{
+  const f = S.form; if(!f.edit) return;
+  const key = f.editKey, id = f.edit;
+  const alt = (S.fahrten[key]||{})[id]; if(!alt) return;
+  S.fahrten[key] = {...(S.fahrten[key]||{}), [id]:{...alt, del:1}};
+  cacheSave(); meldung("Fahrt gelöscht"); formLeeren(); renderAll();
+  await schreibe({path:"fahrten/"+key+".json", id, row:{...alt, del:1}});
+});
+
+/* Zeile antippen → in die Eingabe laden */
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-edit]"); if(!b) return;
+  const key = b.dataset.key, id = b.dataset.edit;
+  const r = (S.fahrten[key]||{})[id]; if(!r) return;
+  S.kopf.d = r.d; S.kopf.z = r.z; S.kopf.s = String(r.s);
+  S.form = {v:r.v, n:r.n, b:r.b|0, t:r.t|0, a:r.a|0, m:r.m|0, k:r.k|0, edit:id, editKey:key};
+  cacheSave();
+  if(b.dataset.jump) tabWechsel("fahrt");
+  renderKopf(); renderFahrt(); renderAbo();
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+/* ---------- Abo ---------- */
+el("a-typ").addEventListener("click", e=>{
+  const c=e.target.closest(".chip"); if(!c) return;
+  S.abo.typ=c.dataset.typ; S.abo.nr=""; renderAbo();
+});
+el("a-zahl").addEventListener("click", e=>{
+  const c=e.target.closest(".chip"); if(!c) return;
+  S.abo.zahl=c.dataset.zahl; renderAbo();
+});
+el("a-nr").addEventListener("change", e=>{ S.abo.nr=e.target.value; renderAbo(); });
+el("a-nr-frei").addEventListener("click", ()=>{
+  const m = el("a-nr-manuell");
+  m.hidden = !m.hidden;
+  el("a-nr").disabled = !m.hidden;
+  el("a-nr-frei").textContent = m.hidden? "Andere Nr…" : "Aus Bestand";
+  if(!m.hidden){ m.value=""; m.focus(); } else { S.abo.nr=""; }
+  renderAbo();
+});
+el("a-nr-manuell").addEventListener("input", e=>{ S.abo.nr = e.target.value.trim(); renderAbo(); });
+
+el("a-save").addEventListener("click", async ()=>{
+  const a = S.abo;
+  if(!a.nr){ el("a-hint").textContent="Bitte eine Abo-Nummer wählen oder erfassen."; return; }
+  const row = {d:S.kopf.d, z:S.kopf.z, s:String(S.kopf.s), typ:a.typ, nr:a.nr, zahl:a.zahl, ts:Date.now()};
+  const y = row.d.slice(0,4);
+  const id = a.edit || newId();
+  S.abos[y] = {...(S.abos[y]||{}), [id]: row};
+  // verkaufte Nummer aus dem Bestand nehmen
+  const feld = a.typ==="M" ? "monats" : "zehner";
+  if(S.bestand[feld].includes(a.nr)){
+    await bestandSchreiben({...S.bestand, [feld]: S.bestand[feld].filter(n=>n!==a.nr)});
+  }
+  cacheSave();
+  meldung((a.typ==="M"?"Monatsabo":"10er-Abo")+" "+a.nr+" gespeichert");
+  S.abo = {typ:a.typ, nr:"", zahl:a.zahl, edit:null};
+  const m=el("a-nr-manuell"); m.hidden=true; m.value=""; el("a-nr").disabled=false; el("a-nr-frei").textContent="Andere Nr…";
+  renderAll();
+  await schreibe({path:"abos/"+y+".json", id, row});
+});
+el("a-delete").addEventListener("click", async ()=>{
+  const a=S.abo; if(!a.edit) return;
+  const y=a.editY, id=a.edit;
+  const alt=(S.abos[y]||{})[id]; if(!alt) return;
+  S.abos[y]={...(S.abos[y]||{}), [id]:{...alt, del:1}};
+  const feld = alt.typ==="M"?"monats":"zehner";
+  if(alt.nr && !S.bestand[feld].includes(alt.nr))
+    await bestandSchreiben({...S.bestand, [feld]:[alt.nr, ...S.bestand[feld]]});
+  cacheSave(); meldung("Abo gelöscht");
+  S.abo={typ:alt.typ, nr:"", zahl:alt.zahl, edit:null};
+  renderAll();
+  await schreibe({path:"abos/"+y+".json", id, row:{...alt, del:1}});
+});
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-aedit]"); if(!b) return;
+  const y=b.dataset.y, id=b.dataset.aedit;
+  const r=(S.abos[y]||{})[id]; if(!r) return;
+  S.kopf.d=r.d; S.kopf.z=r.z; S.kopf.s=String(r.s);
+  S.abo={typ:r.typ, nr:r.nr, zahl:r.zahl, edit:id, editY:y};
+  const m=el("a-nr-manuell"); m.hidden=false; m.value=r.nr; el("a-nr").disabled=true; el("a-nr-frei").textContent="Aus Bestand";
+  renderKopf(); renderAbo();
+});
+
+/* ---------- Journal ---------- */
+el("j-suche").addEventListener("input", e=>{ S.jSuche=e.target.value; renderJournal(); });
+el("j-more").addEventListener("click", async ()=>{
+  if(!Store.bereit()){ meldung("Erst den GitHub-Zugang einrichten."); tabWechsel("setup"); return; }
+  const geladen = S.loaded.slice().sort();
+  const next = shiftMonth(geladen[0] || mk(heute()), -1);
+  const b = el("j-more");
+  b.disabled = true; b.textContent = "lade "+next+" …";
+  const st = await ladeMonat(next);
+  b.disabled = false; b.textContent = "Frühere Monate laden";
+  if(st==="ok") meldung(next+": "+Object.keys(S.fahrten[next]||{}).length+" Fahrten geladen");
+  else if(st==="fehlt") meldung(next+": keine Fahrten vorhanden");
+  else meldung("Monat "+next+" konnte nicht geladen werden.");
+  renderAll();
+});
+
+/* ---------- Start ---------- */
+cacheLoad();
+if(!S.zeitraeume.length) S.zeitraeume = MON.map((m,i)=> m+"/"+MON[(i+1)%12]);
+if(!S.kopf.z) S.kopf.z = zeitraumFor(S.kopf.d);
+renderAll();
+initStore();
+
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("sw.js").catch(()=>{/* ohne Offline-Speicher weiterarbeiten */});
+  });
+}
+</script>
+</body>
+</html>
