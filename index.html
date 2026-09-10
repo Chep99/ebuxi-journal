@@ -183,6 +183,9 @@ input[type="date"]{min-width:9.5em}
 .btn-main:disabled{background:var(--sunk);border-color:var(--line);color:var(--ink3);box-shadow:none;cursor:default}
 .btn-del{color:var(--warn);border-color:var(--warn)}
 .hint{font-size:13px;color:var(--warn);padding:0 2px;min-height:1.2em;margin-top:8px}
+#cfg-status.voll{background:var(--surface2);border:1px solid var(--line);
+  border-left:4px solid currentColor;border-radius:8px;padding:11px 13px;
+  font-size:14.5px;line-height:1.45;min-height:0}
 
 /* ---------- Listen ---------- */
 .side{display:flex;flex-direction:column;gap:14px}
@@ -785,7 +788,19 @@ async function bestandSchreiben(next){
 function setupStatus(text, ok){
   const n = el("cfg-status");
   n.textContent = text;
+  n.classList.toggle("voll", !!text);
   n.style.color = ok===true? "var(--ok)" : ok===false? "var(--warn)" : "var(--ink2)";
+  if(text){
+    try{ n.scrollIntoView({block:"center", behavior:"smooth"}); }catch(e){}
+    if(ok===false) meldung(text);
+  }
+}
+/** Der Knopf zeigt selbst an, dass er arbeitet. */
+function setupBusy(an){
+  const b = el("cfg-pruefen");
+  b.disabled = an;
+  b.querySelector("b").textContent = an? "prüfe Verbindung …" : "Verbinden und speichern";
+  b.querySelector("small").textContent = an? "einen Moment" : "prüft den Zugriff sofort";
 }
 function renderSetup(){
   el("cfg-owner").value  = Store.cfg.owner || "";
@@ -1094,6 +1109,7 @@ el("cfg-pruefen").addEventListener("click", async ()=>{
   if(!owner || !repo || !token){ setupStatus("Bitte Benutzername, Repo und Token ausfüllen.", false); return; }
   const alt = Object.assign({}, Store.cfg);
   Store.cfg = {owner, repo, branch, token}; Store.etags = {};
+  setupBusy(true);
   setupStatus("prüfe Verbindung …", null);
   const g = await Store.hole("stamm/verweise.json", false);
   if(g.status==="ok"){
@@ -1102,26 +1118,28 @@ el("cfg-pruefen").addEventListener("click", async ()=>{
     setupStatus("Verbindung steht. Daten werden geladen …", true);
     renderSetup();
     await initStore();
+    setupBusy(false);
     tabWechsel("fahrt");
-    meldung("Zugang gespeichert");
+    meldung("Zugang gespeichert – Daten geladen");
     return;
   }
   let txt;
   if(g.status==="fehlt"){
     const r = await Store.pruefeRepo();
     txt = r==="ok"
-      ? "Repo erreichbar, aber die Datei stamm/verweise.json fehlt. Sind die Daten schon hochgeladen?"
+      ? "Repo erreichbar, aber die Datei stamm/verweise.json fehlt. Ist das Daten-Repo schon hochgeladen?"
       : r==="nicht-gefunden"
-        ? "Repo nicht gefunden. Name prüfen – oder das Token hat keinen Zugriff auf genau dieses Repo."
+        ? "Repo «"+owner+"/"+repo+"» nicht erreichbar. Entweder stimmt der Name nicht, oder das Token wurde nicht für genau dieses Repo ausgestellt (Only select repositories)."
         : r==="token-ungueltig" ? "Token ungültig oder abgelaufen."
         : r==="verboten" ? "Token hat zu wenig Rechte. «Contents» muss auf «Read and write» stehen."
         : r==="offline" ? "Keine Internetverbindung." : "GitHub antwortet mit einem Fehler.";
   }else{
-    txt = g.status==="kein-zugriff" ? "Token hat keinen Zugriff. Rechte und Repo-Auswahl prüfen."
+    txt = g.status==="kein-zugriff" ? "Token abgelehnt. Prüfe: Contents auf «Read and write», und das Token muss für «"+repo+"» ausgestellt sein."
         : g.status==="offline" ? "Keine Internetverbindung."
         : "GitHub antwortet mit einem Fehler ("+(g.code||"?")+").";
   }
   Store.cfg = alt;
+  setupBusy(false);
   setupStatus(txt, false);
 });
 el("cfg-loeschen").addEventListener("click", ()=>{
