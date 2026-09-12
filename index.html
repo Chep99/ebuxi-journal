@@ -492,6 +492,57 @@ function zeitraumFor(d){
   const [ ,m,dd] = d.split("-").map(Number);
   return dd>=16 ? MON[m-1]+"/"+MON[m%12] : MON[(m+10)%12]+"/"+MON[m-1];
 }
+const MONNR = {Jan:1, Febr:2, "März":3, April:4, Mai:5, Juni:6,
+               Juli:7, Aug:8, Sept:9, Okt:10, Nov:11, Dez:12};
+
+/** "Dez25/Jan26" und "Dez/Jan" meinen denselben Zeitraum. */
+function normZ(z){ return String(z||"").replace(/\d+/g, ""); }
+
+function plusTage(isoDatum, n){
+  const d = new Date(isoDatum + "T12:00:00");
+  d.setDate(d.getDate() + n);
+  return iso(d);
+}
+
+/**
+ * Beginn und Ende des gewählten Zeitraums als Datum.
+ * Das Jahr steckt nicht im Namen, es kommt vom eingestellten Datum –
+ * ausser der Name nennt es selbst, wie bei "Dez25/Jan26".
+ */
+function zeitraumFenster(z, anker){
+  const teile = String(z||"").split("/");
+  if(teile.length !== 2) return null;
+  const m1 = MONNR[teile[0].replace(/\d+/g, "")];
+  const m2 = MONNR[teile[1].replace(/\d+/g, "")];
+  if(!m1 || !m2) return null;
+  const genannt = teile[0].match(/(\d{2})$/);
+  const ankerJahr = Number((anker || heute()).slice(0, 4));
+  const jahre = genannt ? [2000 + Number(genannt[1])]
+                        : [ankerJahr, ankerJahr - 1, ankerJahr + 1];
+  let ersatz = null;
+  for(const y of jahre){
+    const von = y + "-" + p2(m1) + "-16";
+    const bis = (m2 < m1 ? y + 1 : y) + "-" + p2(m2) + "-15";
+    if(anker >= von && anker <= bis) return {von, bis};
+    if(!ersatz) ersatz = {von, bis};
+  }
+  return ersatz;
+}
+
+/** Gehört der Eintrag in den gewählten Zeitraum? Name muss passen, Jahr auch. */
+function imZeitraum(r, z, fenster){
+  if(normZ(r.z) !== normZ(z)) return false;
+  if(!fenster) return true;
+  return r.d >= plusTage(fenster.von, -25) && r.d <= plusTage(fenster.bis, 25);
+}
+
+/** "Aug/Sept 2026" bzw. "Dez/Jan 2025/26" */
+function zeitraumTitel(z, fenster){
+  if(!fenster || /\d/.test(z)) return z;   // "Dez25/Jan26" nennt das Jahr schon selbst
+  const a = fenster.von.slice(0, 4), b = fenster.bis.slice(0, 4);
+  return z + " " + (a === b ? a : a + "/" + b.slice(2));
+}
+
 function fmtDate(d){
   const [y,m,dd]=d.split("-");
   return dd+"."+m+"."+y.slice(2);
@@ -977,9 +1028,10 @@ function renderSchicht(){
 
 function renderZeitraum(){
   const z = S.kopf.z;
-  const rows = alleFahrten().filter(r=> r.z===z);
-  const abos = alleAbos().filter(r=> r.z===z);
-  el("per-title").textContent = "Zeitraum "+z;
+  const fenster = zeitraumFenster(z, S.kopf.d);
+  const rows = alleFahrten().filter(r=> imZeitraum(r, z, fenster));
+  const abos = alleAbos().filter(r=> imZeitraum(r, z, fenster));
+  el("per-title").textContent = "Zeitraum "+zeitraumTitel(z, fenster);
   const t={b:0,t:0,a:0,m:0,k:0};
   rows.forEach(r=>PAYS.forEach(p=>t[p.k]+=(r[p.k]||0)));
   const tage = new Set(rows.map(r=>r.d)).size;
@@ -1028,8 +1080,10 @@ function renderAbo(){
   el("a-delete").hidden = !a.edit;
   el("a-hint").textContent = (!a.nr && !frei.length) ? "Keine freie Nummer im Bestand – mit «Andere Nr…» erfassen." : "";
 
-  const list = alleAbos().filter(r=>r.z===S.kopf.z).sort((x,y)=> x.d<y.d?1:-1);
-  el("a-list-title").textContent = "Abos im Zeitraum "+S.kopf.z;
+  const fenster = zeitraumFenster(S.kopf.z, S.kopf.d);
+  const list = alleAbos().filter(r=> imZeitraum(r, S.kopf.z, fenster))
+                         .sort((x,y)=> x.d<y.d?1:-1);
+  el("a-list-title").textContent = "Abos im Zeitraum "+zeitraumTitel(S.kopf.z, fenster);
   el("a-rows").innerHTML = list.length
     ? list.map(r=>
         '<button class="row" data-aedit="'+r.id+'" data-y="'+r.y+'">'+
