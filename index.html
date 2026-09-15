@@ -2098,21 +2098,8 @@ function pdfAbrechnung(a){
   doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(88, 92, 87);
   doc.text("Nicht in bar, zur Information: Twint Einzelfahrten " + chf(a.twintEF) + ", Twint Abos " + chf(a.twintAbo) + ".", 15, y);
 
-  const kassenPlatz = 6 + (a.kassen.length ? 6 + a.kassen.length * 5.2 : 6) + 20;
-  y = pdfUeberschrift(doc, "Kassenzählungen im Zeitraum", y + 8, kassenPlatz);
-  if(a.kassen.length){
-    doc.autoTable({...PDF_TABELLE, startY:y,
-      head:[["Datum", "Kasse", "Verkäufe", "Mein Stock", "Ergebnis"]],
-      body: a.kassen.map(k => [wochentag(k.d) + " " + fmtDatum4(k.d), pdfText(rp(k.summeKasse)),
-                               pdfText(rp(k.verkaeufe)), pdfText(rp(k.summeStock)), pdfText(rp(k.ergebnis))]),
-      didParseCell: linksBis(1)});
-    y = doc.lastAutoTable.finalY;
-  }else{
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(138, 142, 134);
-    doc.text("Keine Kassenzählung in diesem Zeitraum.", 15, y + 4);
-    y += 6;
-  }
-  pdfVisum(doc, y + 16);
+  // Kassenzählungen gehören nicht auf die Abrechnung, dafür gibt es das eigene Kassen-PDF
+  pdfVisum(doc, y + 22);
   pdfFuss(doc);
   return doc;
 }
