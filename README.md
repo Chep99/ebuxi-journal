@@ -17,7 +17,7 @@ Ersetzt die Excel-Mappe `FahrtenJournal_Version_13_01.xlsm`.
 
 | Datei | Zweck |
 |---|---|
-| `index.html` | die ganze App — HTML, CSS und JavaScript in einer Datei, keine Abhängigkeiten |
+| `index.html` | die ganze App — HTML, CSS und JavaScript in einer Datei; nur für die PDFs wird jsPDF nachgeladen |
 | `manifest.webmanifest` | erlaubt «Zum Home-Bildschirm hinzufügen» mit eigenem Symbol |
 | `sw.js` | Service Worker: hält die App-Hülle offline bereit |
 | `icon.svg`, `icon-180.png` | App-Symbol |
