@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Fahrten- und Abo-Erfassung fuer den eBuxi Herzogenbuchsee">
+<meta name="description" content="Fahrten- und Abo-Erfassung fuer den EBuxi Herzogenbuchsee">
 <meta name="theme-color" content="#F2C200">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="eBuxi">
+<meta name="apple-mobile-web-app-title" content="EBuxi">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
-<title>eBuxi Fahrtenjournal</title>
+<title>EBuxi Fahrtenjournal</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
@@ -315,10 +315,10 @@ table.abr .null{color:var(--ink3)}
 <header class="top">
   <div class="top-in">
     <div class="mark">
-      <div class="bx">eB</div>
+      <div class="bx">EB</div>
       <div>
         <b>Fahrtenjournal</b>
-        <span>eBuxi Herzogenbuchsee</span>
+        <span>EBuxi Herzogenbuchsee</span>
       </div>
     </div>
     <button class="sync is-wait" id="sync" title="Zugang einrichten" aria-label="Zugang einrichten"><i></i><span>verbinde…</span></button>
@@ -474,7 +474,7 @@ table.abr .null{color:var(--ink3)}
           <div class="bilanz-z"><span>− Mein Stock<small>eigenes Wechselgeld</small></span><b id="kb-stock"></b></div>
           <div class="bilanz-z ergebnis"><span>Ergebnis</span><b id="kb-ergebnis"></b></div>
         </div>
-        <p class="note">Stock von eBuxi ist 150.–</p>
+        <p class="note">Stock von EBuxi ist 150.–</p>
 
         <p class="hint" id="k-hint"></p>
 
@@ -582,7 +582,7 @@ table.abr .null{color:var(--ink3)}
 <script>
 "use strict";
 /* ============================================================
-   eBuxi Fahrtenjournal — Dateien im privaten Daten-Repo
+   EBuxi Fahrtenjournal — Dateien im privaten Daten-Repo
    fahrten/<JJJJ-MM>.json  { rows: { id: {d,z,s,v,n,b,t,a,m,k,del} } }
    abos/<JJJJ>.json        { rows: { id: {d,z,s,typ,nr,zahl,del} } }
    stamm/verweise.json     { strassen[], schichten[], zeitraeume[], top[], tarife{} }
@@ -955,7 +955,7 @@ async function flush(){
     const pfad = S.outbox[0].path;
     const gruppe = S.outbox.filter(j=>j.path===pfad);
     const r = await Store.verschmelze(pfad, rows=>{ for(const j of gruppe) rows[j.id] = j.row; },
-      "eBuxi: "+gruppe.length+(gruppe.length===1? " Eintrag":" Einträge")+" – "+pfad);
+      "EBuxi: "+gruppe.length+(gruppe.length===1? " Eintrag":" Einträge")+" – "+pfad);
     if(r.status!=="ok"){
       flushing = false;
       if(r.status==="kein-zugriff") setSync("local","Zugang prüfen"); else syncText();
@@ -989,7 +989,7 @@ async function bestandSchreiben(next){
   if(!Store.bereit()) return;
   const g = await Store.hole("bestand/abonr.json", false);
   if(g.status==="offline" || g.status==="kein-zugriff") return;
-  await Store.lege("bestand/abonr.json", next, g.sha, "eBuxi: Abo-Bestand aktualisiert");
+  await Store.lege("bestand/abonr.json", next, g.sha, "EBuxi: Abo-Bestand aktualisiert");
 }
 
 /* ---------- Einrichtung ---------- */
@@ -2032,7 +2032,7 @@ function pdfNeu(titel, untertitel){
   doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(88, 92, 87);
   doc.text(pdfText(untertitel), 15, 27);
   doc.setFontSize(8.5);
-  doc.text("eBuxi Herzogenbuchsee", 195, 18, {align:"right"});
+  doc.text("Hansjörg Buser", 195, 18, {align:"right"});
   const jetzt = new Date();
   doc.text("erstellt " + fmtDatum4(iso(jetzt)) + ", " + p2(jetzt.getHours()) + ":" + p2(jetzt.getMinutes()), 195, 23, {align:"right"});
   doc.setDrawColor(215, 215, 207); doc.setLineWidth(0.3); doc.line(15, 31, 195, 31);
@@ -2062,7 +2062,7 @@ function pdfFuss(doc){
 
 function pdfAbrechnung(a){
   const leer = v => v ? v : "";
-  const doc = pdfNeu("Fahrtenkontrolle eBuxi",
+  const doc = pdfNeu("Fahrtenkontrolle EBuxi",
     "Abrechnung " + a.p.titel + "  ·  " + fmtDatum4(a.p.f.von) + " bis " + fmtDatum4(a.p.f.bis));
   doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(27, 29, 28);
   doc.text(a.einsaetze.length + " Einsätze  ·  " + a.tot.fahrten + " Fahrten  ·  " + a.tot.pax + " Passagiere", 15, 38);
@@ -2109,7 +2109,7 @@ function pdfKasse(){
   const v = barVerkaeufe(k.d);
   const kasse = summeRp(k.kasse, NOM_KASSE), stock = summeRp(k.stock, NOM_STOCK);
   const verk = k.verkaeufe == null ? v.rappen : k.verkaeufe;
-  const doc = pdfNeu("Kassenzählung eBuxi",
+  const doc = pdfNeu("Kassenzählung EBuxi",
     wochentagLang(k.d) + ", " + fmtDatum4(k.d) + "  ·  Zeitraum " + zeitraumTitel(v.z, v.f));
 
   const zeilen = (liste, werte) => liste.map(n => [n.name, werte[n.k] || "",
@@ -2137,7 +2137,7 @@ function pdfKasse(){
     didParseCell: linksBis(2)});
   y = doc.lastAutoTable.finalY + 6;
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(88, 92, 87);
-  doc.text("Stock von eBuxi ist 150.–", 15, y);
+  doc.text("Stock von EBuxi ist 150.–", 15, y);
   pdfVisum(doc, y + 22);
   pdfFuss(doc);
   return doc;
@@ -2169,13 +2169,13 @@ el("abr-pdf").addEventListener("click", async () => {
   if(!zeitraumGeladen(p)){ el("abr-hint").textContent = "Die Daten dieses Zeitraums sind noch nicht geladen."; return; }
   el("abr-hint").textContent = "";
   const doc = pdfAbrechnung(abrechnungDaten(p));
-  await pdfAusgeben(doc, dateiName("eBuxi_Abrechnung_" + p.titel.replace("/", "-") + ".pdf"));
+  await pdfAusgeben(doc, dateiName("EBuxi_Abrechnung_" + p.titel.replace("/", "-") + ".pdf"));
 });
 el("k-pdf").addEventListener("click", async () => {
   if(!await pdfVorbereiten(el("k-hint"))) return;
   if(!summeRp(S.kz.kasse, NOM_KASSE)){ el("k-hint").textContent = "Bitte zuerst das Geld in der Kasse zählen."; return; }
   el("k-hint").textContent = "";
-  await pdfAusgeben(pdfKasse(), "eBuxi_Kassenzaehlung_" + S.kz.d + ".pdf");
+  await pdfAusgeben(pdfKasse(), "EBuxi_Kassenzaehlung_" + S.kz.d + ".pdf");
 });
 
 /* ---------- Start ---------- */

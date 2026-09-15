@@ -1,6 +1,6 @@
-# eBuxi Fahrtenjournal — App
+# EBuxi Fahrtenjournal — App
 
-Web-App für den eBuxi Herzogenbuchsee: Fahrten und Abo-Verkäufe erfassen, die Kasse
+Web-App für den EBuxi Herzogenbuchsee: Fahrten und Abo-Verkäufe erfassen, die Kasse
 zählen und pro Zeitraum abrechnen – jeweils mit PDF. Läuft auf PC, iPad und Android-Handy,
 ohne Installation, direkt im Browser.
 

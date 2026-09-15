@@ -1,7 +1,7 @@
 {
-  "name": "eBuxi Fahrtenjournal",
-  "short_name": "eBuxi",
-  "description": "Fahrten und Abos des eBuxi Herzogenbuchsee erfassen",
+  "name": "EBuxi Fahrtenjournal",
+  "short_name": "EBuxi",
+  "description": "Fahrten und Abos des EBuxi Herzogenbuchsee erfassen",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
