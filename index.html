@@ -241,6 +241,75 @@ input[type="date"]{min-width:9.5em}
 .note{font-size:13px;color:var(--ink2);background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:9px 11px;margin-top:12px}
 .bar-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .grow{flex:1}
+
+/* ---------- Reiter: vier nebeneinander, auch auf dem Handy ---------- */
+@media (max-width:520px){
+  .tabs{gap:4px;padding:10px 10px 0}
+  .tab{padding:10px 2px;font-size:13px}
+  .tab small{font-size:10.5px}
+}
+
+/* ---------- Umschalter ---------- */
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:999px;padding:3px;background:var(--surface2);gap:2px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:8px 15px;font-weight:600;font-size:14px;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+h3.k-titel{font-size:15px;margin:20px 0 8px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+h3.k-titel .lbl{font-family:"IBM Plex Sans",system-ui,sans-serif}
+
+/* ---------- Kassenzählung ---------- */
+.zaehl{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.zaehl-kopf,.zaehl-z{display:grid;grid-template-columns:minmax(0,1fr) auto 5.6em;gap:10px;align-items:center;padding:6px 11px}
+.zaehl-kopf{background:var(--surface2);border-bottom:1px solid var(--line);padding:7px 11px}
+.zaehl-kopf span:last-child{text-align:right}
+.zaehl-z{border-top:1px solid var(--line)}
+.zaehl-kopf + .zaehl-z{border-top:0}
+.zaehl-z.on{background:var(--surface2)}
+.zaehl-z .nom{font-weight:600;font-size:15px}
+.zaehl-z .betrag{text-align:right;font-size:15px}
+.zaehl-z .leer{color:var(--ink3)}
+.anz{display:flex;align-items:center}
+.anz button{width:40px;height:40px;border:1px solid var(--line-strong);background:var(--surface2);font-size:20px;font-weight:600;line-height:1;display:grid;place-items:center}
+.anz button:first-child{border-radius:8px 0 0 8px}
+.anz button:last-child{border-radius:0 8px 8px 0}
+.anz input{width:3.3em;height:40px;text-align:center;border:1px solid var(--line-strong);border-left:0;border-right:0;
+  border-radius:0;padding:0;font-size:17px;font-weight:600;background:var(--surface);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.zaehl-summe{display:flex;justify-content:space-between;align-items:baseline;padding:10px 11px;
+  border-top:1px solid var(--line-strong);background:var(--surface2);font-weight:600}
+.zaehl-summe .num{font-size:17px}
+
+.bilanz{border:1px solid var(--line-strong);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.bilanz-z{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 13px;border-top:1px dashed var(--line)}
+.bilanz-z:first-child{border-top:0}
+.bilanz-z > span:first-child{font-weight:500}
+.bilanz-z small{display:block;color:var(--ink3);font-size:12px;font-weight:400;margin-top:1px}
+.bilanz-z b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;font-size:16px;text-align:right;white-space:nowrap}
+.bilanz-z.ergebnis{background:var(--accent-soft);border-top:2px solid var(--accent-line)}
+.bilanz-z.ergebnis > span:first-child{font-family:Archivo,sans-serif;font-weight:800;font-size:16px}
+.bilanz-z.ergebnis b{font-size:22px;font-family:Archivo,sans-serif;font-weight:800}
+.verk-feld{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.verk-feld input{width:6.4em;text-align:right;font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;font-size:16px}
+.linkbtn{border:0;background:none;padding:0;color:var(--twint);font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+
+/* ---------- Abrechnung ---------- */
+.tabelle-rahmen{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table.abr{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+table.abr th{background:var(--surface2);text-align:right;padding:8px 10px;font-size:10.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink2);border-bottom:1px solid var(--line-strong);white-space:nowrap;font-weight:600}
+table.abr td{padding:7px 10px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
+table.abr th.l, table.abr td.l{text-align:left}
+table.abr tbody tr:first-child td{border-top:0}
+table.abr tr.total td{font-weight:700;background:var(--surface2);border-top:2px solid var(--line-strong)}
+table.abr .null{color:var(--ink3)}
+@media (max-width:520px){
+  .actionbar{gap:6px}
+  .actionbar .btn:not(.btn-main){padding:12px 10px;font-size:14px}
+  .btn-main{min-width:0;padding:10px 8px}
+  .btn-main b{font-size:15px}
+}
+.btn-pdf{background:var(--ink);color:var(--surface);border-color:var(--ink);white-space:nowrap}
+.btn-pdf:disabled{opacity:.5;cursor:default}
 </style>
 
 <header class="top">
@@ -259,7 +328,8 @@ input[type="date"]{min-width:9.5em}
 <nav class="tabs" role="tablist">
   <button class="tab" role="tab" id="tab-fahrt" aria-selected="true"><b>Fahrt</b><small id="tc-fahrt">erfassen</small></button>
   <button class="tab" role="tab" id="tab-abo" aria-selected="false"><b>Abo</b><small id="tc-abo">verkaufen</small></button>
-  <button class="tab" role="tab" id="tab-journal" aria-selected="false"><b>Journal</b><small id="tc-journal">nachsehen</small></button>
+  <button class="tab" role="tab" id="tab-kasse" aria-selected="false"><b>Kasse</b><small id="tc-kasse">zählen</small></button>
+  <button class="tab" role="tab" id="tab-abrechnung" aria-selected="false"><b>Abrechnung</b><small id="tc-abrechnung">Zeitraum</small></button>
 </nav>
 
 <main class="shell">
@@ -374,13 +444,84 @@ input[type="date"]{min-width:9.5em}
     </div>
   </section>
 
-  <!-- ======== JOURNAL ======== -->
-  <section class="pane" id="pane-journal" hidden>
-    <div class="bar-inline">
-      <label class="f grow"><span class="lbl">Suchen</span><input type="text" id="j-suche" placeholder="Strasse, Datum oder Schicht"></label>
-      <button class="btn" id="j-more">Frühere Monate laden</button>
+  <!-- ======== KASSE ======== -->
+  <section class="pane" id="pane-kasse" hidden>
+    <div class="cols">
+      <div>
+        <div class="head">
+          <div class="head-row">
+            <label class="f"><span class="lbl">Datum der Zählung</span><input type="date" id="k-datum"></label>
+            <div class="f grow"><span class="lbl">Zeitraum</span><div id="k-zeitraum" style="padding:4px 0 0;font-weight:600;line-height:1.3"></div></div>
+          </div>
+        </div>
+
+        <h3 class="k-titel">Kasse <span class="lbl">alles Geld in der Kasse</span></h3>
+        <div class="zaehl" id="k-kasse"></div>
+
+        <h3 class="k-titel">Mein Stock <span class="lbl">eigenes Wechselgeld</span></h3>
+        <div class="zaehl" id="k-stock"></div>
+
+        <h3 class="k-titel">Ergebnis</h3>
+        <div class="bilanz" id="k-bilanz">
+          <div class="bilanz-z"><span>Summe Stückelung<small>alles Geld in der Kasse</small></span><b id="kb-kasse"></b></div>
+          <div class="bilanz-z">
+            <span>− Aktuelle Verkäufe<small id="kb-verk-info"></small></span>
+            <span class="verk-feld">
+              <input type="text" inputmode="decimal" id="kb-verk" aria-label="Aktuelle Verkäufe in Franken">
+              <button type="button" class="linkbtn" id="kb-verk-auto" hidden>wieder automatisch</button>
+            </span>
+          </div>
+          <div class="bilanz-z"><span>− Mein Stock<small>eigenes Wechselgeld</small></span><b id="kb-stock"></b></div>
+          <div class="bilanz-z ergebnis"><span>Ergebnis</span><b id="kb-ergebnis"></b></div>
+        </div>
+        <p class="note">Stock von eBuxi ist 150.–</p>
+
+        <p class="hint" id="k-hint"></p>
+
+        <div class="actionbar">
+          <button class="btn btn-main" id="k-save"><b>Zählung speichern</b><small id="k-save-sub"></small></button>
+          <button class="btn" id="k-leeren">Leeren</button>
+          <button class="btn btn-del" id="k-delete" hidden>Löschen</button>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <h3>Als PDF</h3>
+          <p style="font-size:14px;color:var(--ink2);margin:0 0 10px">Die Zählung, wie sie gerade auf dem Bildschirm steht – mit beiden Stückelungen und dem Ergebnis.</p>
+          <button class="btn btn-pdf" id="k-pdf" style="width:100%">PDF dieser Zählung</button>
+        </div>
+        <div class="card">
+          <h3>Gespeicherte Zählungen</h3>
+          <div class="rows" id="k-liste"></div>
+        </div>
+      </div>
     </div>
-    <div id="j-body"></div>
+  </section>
+
+  <!-- ======== ABRECHNUNG ======== -->
+  <section class="pane" id="pane-abrechnung" hidden>
+    <div class="seg" role="group" aria-label="Ansicht">
+      <button type="button" id="sub-abr" aria-pressed="true">Abrechnung</button>
+      <button type="button" id="sub-journal" aria-pressed="false">Fahrtenliste</button>
+    </div>
+
+    <div id="ansicht-abr">
+      <div class="bar-inline" style="align-items:flex-end">
+        <label class="f grow"><span class="lbl">Zeitraum</span><select id="abr-zeitraum"></select></label>
+        <button class="btn btn-pdf" id="abr-pdf">PDF erstellen</button>
+      </div>
+      <p class="hint" id="abr-hint"></p>
+      <div id="abr-body"></div>
+    </div>
+
+    <div id="ansicht-journal" hidden>
+      <div class="bar-inline">
+        <label class="f grow"><span class="lbl">Suchen</span><input type="text" id="j-suche" placeholder="Strasse, Datum oder Schicht"></label>
+        <button class="btn" id="j-more">Frühere Monate laden</button>
+      </div>
+      <div id="j-body"></div>
+    </div>
   </section>
   <!-- ======== EINRICHTUNG ======== -->
   <section class="pane" id="pane-setup" hidden>
@@ -446,6 +587,7 @@ input[type="date"]{min-width:9.5em}
    abos/<JJJJ>.json        { rows: { id: {d,z,s,typ,nr,zahl,del} } }
    stamm/verweise.json     { strassen[], schichten[], zeitraeume[], top[], tarife{} }
    bestand/abonr.json      { zehner[], monats[] }
+   kasse/<JJJJ>.json       { rows: { id: {d,z,ts,kasse{},stock{},verkaeufe,ergebnis,del} } }
    Gelesen und geschrieben ueber die GitHub-Contents-API; jede Aenderung
    ist ein Commit. Eintraege sind nach Id verschluesselt abgelegt, damit
    zwei Geraete denselben Monat gefahrlos ergaenzen koennen.
@@ -474,7 +616,10 @@ const S = {
   form:{v:"", n:"", b:0,t:0,a:0,m:0,k:0, edit:null},
   abo:{typ:"10er", nr:"", zahl:"bar", edit:null},
   loaded:[],            // geladene Monatsschlüssel
-  tab:"fahrt", jSuche:""
+  tab:"fahrt", jSuche:"",
+  kasse:{},             // jahr -> {id:row}
+  kz:null,              // Kassenzählung in Arbeit
+  abrVon:"", abrAnsicht:"abr"
 };
 
 /* ---------- kleine Helfer ---------- */
@@ -581,7 +726,7 @@ function pax(r){ return (r.b||0)+(r.t||0)+(r.a||0)+(r.m||0)+(r.k||0); }
 function cacheSave(){
   try{
     localStorage.setItem(LS, JSON.stringify({
-      fahrten:S.fahrten, abos:S.abos, bestand:S.bestand, outbox:S.outbox,
+      fahrten:S.fahrten, abos:S.abos, kasse:S.kasse, bestand:S.bestand, outbox:S.outbox,
       kopf:S.kopf, loaded:S.loaded,
       stamm:{strassen:S.strassen, schichten:S.schichten, zeitraeume:S.zeitraeume, top:S.top}
     }));
@@ -593,6 +738,7 @@ function cacheLoad(){
     const c = JSON.parse(raw);
     if(c.fahrten) S.fahrten=c.fahrten;
     if(c.abos) S.abos=c.abos;
+    if(c.kasse) S.kasse=c.kasse;
     if(c.bestand) S.bestand=c.bestand;
     if(Array.isArray(c.outbox)) S.outbox=c.outbox;
     if(Array.isArray(c.loaded)) S.loaded=c.loaded;
@@ -728,7 +874,9 @@ function outboxUeberlagern(){
     let m = j.path.match(/^fahrten\/(.+)\.json$/);
     if(m){ S.fahrten[m[1]] = Object.assign({}, S.fahrten[m[1]]||{}, {[j.id]: j.row}); continue; }
     m = j.path.match(/^abos\/(.+)\.json$/);
-    if(m){ S.abos[m[1]] = Object.assign({}, S.abos[m[1]]||{}, {[j.id]: j.row}); }
+    if(m){ S.abos[m[1]] = Object.assign({}, S.abos[m[1]]||{}, {[j.id]: j.row}); continue; }
+    m = j.path.match(/^kasse\/(.+)\.json$/);
+    if(m){ S.kasse[m[1]] = Object.assign({}, S.kasse[m[1]]||{}, {[j.id]: j.row}); }
   }
 }
 
@@ -767,6 +915,14 @@ async function ladeAbos(jahr, mitEtag){
   return g.status;
 }
 
+async function ladeKasse(jahr, mitEtag){
+  const g = await Store.hole("kasse/"+jahr+".json", !!mitEtag);
+  if(g.status==="ok") S.kasse[jahr] = (g.daten && g.daten.rows) || {};
+  else if(g.status==="fehlt") S.kasse[jahr] = S.kasse[jahr] || {};
+  outboxUeberlagern(); cacheSave();
+  return g.status;
+}
+
 async function initStore(){
   Store.laden(); renderSetup();
   if(!Store.bereit()){ setSync("local","nicht eingerichtet"); tabWechsel("setup"); renderAll(); return; }
@@ -783,6 +939,7 @@ async function initStore(){
   for(const k of [shiftMonth(hk,-1), hk, shiftMonth(hk,1)]) await ladeMonat(k);
   const jahr = Number(heute().slice(0,4));
   for(const y of [jahr-1, jahr]) await ladeAbos(String(y));
+  for(const y of [jahr-1, jahr]) await ladeKasse(String(y));
   renderAll(); syncText(); flush();
 }
 
@@ -940,7 +1097,9 @@ function strassenWahl(titel, aktuell, cb){
    Darstellung
    ============================================================ */
 function renderAll(){
-  renderKopf(); renderFahrt(); renderAbo(); renderJournal(); renderTabCounts();
+  renderKopf(); renderFahrt(); renderAbo(); renderJournal(); kasseAktualisieren();
+  if(S.tab==="abrechnung") renderAbrechnung();
+  renderTabCounts();
 }
 
 function renderKopf(){
@@ -1137,7 +1296,9 @@ function renderTabCounts(){
   const heuteRows = alleFahrten().filter(r=>r.d===S.kopf.d);
   el("tc-fahrt").textContent = heuteRows.length? heuteRows.length+" heute" : "erfassen";
   el("tc-abo").textContent = S.bestand.zehner.length+S.bestand.monats.length ? (S.bestand.zehner.length+S.bestand.monats.length)+" Nr frei" : "verkaufen";
-  el("tc-journal").textContent = alleFahrten().length+" Fahrten";
+  const letzte = alleKassen()[0];
+  el("tc-kasse").textContent = letzte ? "zuletzt "+fmtDate(letzte.d).slice(0,6) : "zählen";
+  el("tc-abrechnung").textContent = zeitraumFor(heute());
 }
 
 /* ============================================================
@@ -1145,13 +1306,15 @@ function renderTabCounts(){
    ============================================================ */
 function tabWechsel(name){
   S.tab = name;
-  for(const n of ["fahrt","abo","journal","setup"]){
+  for(const n of ["fahrt","abo","kasse","abrechnung","setup"]){
     const t = el("tab-"+n);
     if(t) t.setAttribute("aria-selected", String(n===name));
     el("pane-"+n).hidden = n!==name;
   }
+  if(name==="kasse" || name==="abrechnung") pdfLaden().catch(()=>{/* Hinweis erst beim Knopfdruck */});
+  if(name==="abrechnung") abrechnungOeffnen();
 }
-["fahrt","abo","journal"].forEach(n=> el("tab-"+n).addEventListener("click", ()=>tabWechsel(n)));
+["fahrt","abo","kasse","abrechnung"].forEach(n=> el("tab-"+n).addEventListener("click", ()=>tabWechsel(n)));
 el("sync").addEventListener("click", ()=> tabWechsel(S.tab==="setup"? "fahrt" : "setup"));
 el("cfg-zurueck").addEventListener("click", ()=> tabWechsel("fahrt"));
 
@@ -1373,8 +1536,664 @@ el("j-more").addEventListener("click", async ()=>{
   renderAll();
 });
 
+/* ============================================================
+   Kassenzählung
+   kasse/<JJJJ>.json  { rows: { id: {d,z,ts,kasse{},stock{},verkaeufe,
+                                     verkaeufeAuto,manuell,summeKasse,
+                                     summeStock,ergebnis,del} } }
+   Beträge in Rappen, damit keine Rundungsfehler entstehen.
+   ============================================================ */
+const NOM_KASSE = [
+  {k:"100", rp:10000, name:"100er"}, {k:"50", rp:5000, name:"50er"}, {k:"20", rp:2000, name:"20er"},
+  {k:"10",  rp:1000,  name:"10er"},  {k:"5",  rp:500,  name:"5er"},  {k:"2",  rp:200,  name:"2er"},
+  {k:"1",   rp:100,   name:"1er"},   {k:"0.5",rp:50,   name:"50 Rp."},{k:"0.2",rp:20,  name:"20 Rp."},
+  {k:"0.1", rp:10,    name:"10 Rp."},{k:"0.05",rp:5,   name:"5 Rp."}
+];
+const NOM_STOCK = NOM_KASSE.slice(0, 7);          // wie in der Mappe: 100er bis 1er
+const LS_KASSE = "ebuxi.kasse.entwurf";
+const DATEN_AB = "2024-09-16";                    // erster Tag mit Fahrten
+
+/** Rappen -> "527.–", "12.35", "−81.–" */
+function rp(n){
+  const neg = n < 0; n = Math.abs(Math.round(n || 0));
+  const fr = Math.floor(n / 100), r = n % 100;
+  return (neg ? "−" : "") + fr.toLocaleString("de-CH") + (r ? "." + p2(r) : ".–");
+}
+/** Für das Eingabefeld: "191" bzw. "12.35" */
+function rpEingabe(n){
+  n = Math.round(n || 0);
+  return n % 100 ? (n / 100).toFixed(2) : String(n / 100);
+}
+function parseFranken(t){
+  const s = String(t || "").replace(/[’'\s]/g, "").replace(",", ".").replace(/\.[–-]$/, "");
+  if(!s) return null;
+  const n = Number(s);
+  return isFinite(n) && n >= 0 ? Math.round(n * 100) : null;
+}
+function fmtDatum4(d){ return d.split("-").reverse().join("."); }
+function wochentagLang(d){
+  return ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"][new Date(d+"T12:00:00").getDay()];
+}
+
+function leereZaehlung(d){ return {d: d || heute(), kasse:{}, stock:{}, verkaeufe:null, edit:null, editY:null}; }
+function summeRp(werte, liste){ return liste.reduce((s, n)=> s + (Number(werte[n.k]) || 0) * n.rp, 0); }
+
+function alleKassen(){
+  const out = [];
+  for(const y of Object.keys(S.kasse))
+    for(const [id, r] of Object.entries(S.kasse[y]))
+      if(r && !r.del) out.push({id, y, ...r});
+  return out.sort((a, b)=> a.d !== b.d ? (a.d < b.d ? 1 : -1) : (b.ts || 0) - (a.ts || 0));
+}
+
+/** Bar-Einnahmen vom Beginn des Zeitraums bis und mit dem Zähltag. */
+function barVerkaeufe(datum){
+  const z = zeitraumFor(datum);
+  const f = zeitraumFenster(z, datum);
+  const fahrten = alleFahrten().filter(r => imZeitraum(r, z, f) && r.d <= datum);
+  const abos = alleAbos().filter(r => imZeitraum(r, z, f) && r.d <= datum && r.zahl === "bar");
+  const bar = fahrten.reduce((s, r)=> s + (r.b || 0), 0);
+  const a10 = abos.filter(a => a.typ !== "M").length;
+  const aM  = abos.filter(a => a.typ === "M").length;
+  const rappen = (bar * TARIF.einzelfahrt + a10 * TARIF.abo10 + aM * TARIF.aboMonat) * 100;
+  return {rappen, bar, a10, aM, z, f};
+}
+function verkaufText(v){
+  const teile = [v.bar + (v.bar === 1 ? " Bar-Fahrt" : " Bar-Fahrten") + " × 4.–"];
+  if(v.a10) teile.push(v.a10 + " × 10er-Abo");
+  if(v.aM)  teile.push(v.aM + " × Monatsabo");
+  return teile.join(" + ") + (v.f ? " seit " + fmtDate(v.f.von) : "");
+}
+
+function kasseEntwurfSichern(){ try{ localStorage.setItem(LS_KASSE, JSON.stringify(S.kz)); }catch(e){} }
+function kasseEntwurfLoeschen(){ try{ localStorage.removeItem(LS_KASSE); }catch(e){} }
+function kasseEntwurfLaden(){
+  try{ const r = localStorage.getItem(LS_KASSE); if(r) S.kz = JSON.parse(r); }catch(e){}
+}
+
+function zaehlTabelle(feld, liste, werte){
+  const zeilen = liste.map(n => {
+    const anz = Number(werte[n.k]) || 0;
+    return '<div class="zaehl-z' + (anz ? " on" : "") + '" data-feld="' + feld + '" data-k="' + n.k + '">' +
+      '<span class="nom">' + n.name + '</span>' +
+      '<span class="anz">' +
+        '<button type="button" data-schritt="-1" aria-label="' + n.name + ' weniger">−</button>' +
+        '<input type="text" inputmode="numeric" pattern="[0-9]*" value="' + (anz || "") + '" placeholder="0" aria-label="Anzahl ' + n.name + '">' +
+        '<button type="button" data-schritt="1" aria-label="' + n.name + ' mehr">+</button>' +
+      '</span>' +
+      '<span class="betrag num">' + (anz ? rp(anz * n.rp) : '<span class="leer">–</span>') + '</span>' +
+    '</div>';
+  }).join("");
+  return '<div class="zaehl-kopf lbl"><span>Stückelung</span><span>Anzahl</span><span>Betrag</span></div>' + zeilen +
+    '<div class="zaehl-summe"><span>Total</span><span class="num" data-summe="' + feld + '">' +
+    rp(summeRp(werte, liste)) + '</span></div>';
+}
+
+function renderKasseKopf(){
+  const k = S.kz;
+  if(document.activeElement !== el("k-datum")) el("k-datum").value = k.d;
+  const v = barVerkaeufe(k.d);
+  el("k-zeitraum").innerHTML = esc(zeitraumTitel(v.z, v.f)) +
+    (v.f ? '<small style="display:block;font-weight:400;color:var(--ink3);font-size:12.5px">' +
+           fmtDate(v.f.von) + " – " + fmtDate(v.f.bis) + "</small>" : "");
+}
+
+function renderBilanz(){
+  const k = S.kz;
+  const kasse = summeRp(k.kasse, NOM_KASSE), stock = summeRp(k.stock, NOM_STOCK);
+  const v = barVerkaeufe(k.d);
+  const verk = k.verkaeufe == null ? v.rappen : k.verkaeufe;
+  el("kb-kasse").textContent = rp(kasse);
+  el("kb-stock").textContent = rp(stock);
+  const feld = el("kb-verk");
+  if(document.activeElement !== feld) feld.value = rpEingabe(verk);
+  el("kb-verk-info").textContent = k.verkaeufe == null
+    ? verkaufText(v)
+    : "fester Betrag · berechnet wären " + rp(v.rappen);
+  el("kb-verk-auto").hidden = k.verkaeufe == null;
+  const ergebnis = kasse - verk - stock;
+  el("kb-ergebnis").textContent = rp(ergebnis);
+  el("k-save-sub").textContent = "Ergebnis " + rp(ergebnis);
+}
+
+function renderKasseListe(){
+  const liste = alleKassen().slice(0, 40);
+  el("k-liste").innerHTML = liste.length
+    ? liste.map(r =>
+        '<button class="row" data-kedit="' + r.id + '" data-y="' + r.y + '">' +
+          '<span class="strecke">' + wochentag(r.d) + " " + fmtDate(r.d) + ' <i>·</i> ' + esc(r.z || "") + '</span>' +
+          '<span class="num" style="font-weight:600">' + rp(r.ergebnis) + '</span>' +
+          '<span class="meta">' + (S.outbox.some(j => j.id === r.id) ? '<span class="flag">wartet</span>' : "öffnen") + '</span>' +
+        '</button>').join("")
+    : '<p class="empty">Noch keine Zählung gespeichert.</p>';
+}
+
+function renderKasse(){
+  if(!S.kz) S.kz = leereZaehlung();
+  const k = S.kz;
+  renderKasseKopf();
+  el("k-kasse").innerHTML = zaehlTabelle("kasse", NOM_KASSE, k.kasse);
+  el("k-stock").innerHTML = zaehlTabelle("stock", NOM_STOCK, k.stock);
+  el("kb-verk").value = "";
+  renderBilanz();
+  renderKasseListe();
+  el("k-save").querySelector("b").textContent = k.edit ? "Änderung speichern" : "Zählung speichern";
+  el("k-delete").hidden = !k.edit;
+  el("k-leeren").textContent = k.edit ? "Abbrechen" : "Leeren";
+  el("k-hint").textContent = "";
+}
+
+/** Sanfte Aktualisierung: baut keine Eingabefelder neu, damit der Cursor bleibt. */
+function kasseAktualisieren(){
+  if(!S.kz || !el("k-kasse").children.length){ renderKasse(); return; }
+  renderKasseKopf(); renderBilanz(); renderKasseListe();
+}
+
+function zaehlZeileAktualisieren(zeile){
+  const feld = zeile.dataset.feld, key = zeile.dataset.k;
+  const liste = feld === "kasse" ? NOM_KASSE : NOM_STOCK;
+  const n = liste.find(x => x.k === key);
+  const anz = Number(S.kz[feld][key]) || 0;
+  zeile.classList.toggle("on", anz > 0);
+  zeile.querySelector(".betrag").innerHTML = anz ? rp(anz * n.rp) : '<span class="leer">–</span>';
+  zeile.parentElement.querySelector('[data-summe="' + feld + '"]').textContent = rp(summeRp(S.kz[feld], liste));
+  renderBilanz();
+}
+
+el("pane-kasse").addEventListener("click", e => {
+  const b = e.target.closest("[data-schritt]"); if(!b) return;
+  const zeile = b.closest(".zaehl-z");
+  const feld = zeile.dataset.feld, key = zeile.dataset.k;
+  const neu = Math.max(0, Math.min(9999, (Number(S.kz[feld][key]) || 0) + Number(b.dataset.schritt)));
+  if(neu) S.kz[feld][key] = neu; else delete S.kz[feld][key];
+  zeile.querySelector("input").value = neu || "";
+  zaehlZeileAktualisieren(zeile);
+  kasseEntwurfSichern();
+});
+el("pane-kasse").addEventListener("input", e => {
+  const feld = e.target.closest(".zaehl-z input");
+  if(feld){
+    const zeile = feld.closest(".zaehl-z");
+    const zahl = parseInt(feld.value.replace(/\D/g, ""), 10);
+    if(zahl > 0) S.kz[zeile.dataset.feld][zeile.dataset.k] = Math.min(zahl, 9999);
+    else delete S.kz[zeile.dataset.feld][zeile.dataset.k];
+    zaehlZeileAktualisieren(zeile);
+    kasseEntwurfSichern();
+    return;
+  }
+  if(e.target.id === "kb-verk"){
+    S.kz.verkaeufe = parseFranken(e.target.value);
+    renderBilanz(); kasseEntwurfSichern();
+  }
+});
+el("pane-kasse").addEventListener("focusout", e => {
+  if(e.target.id === "kb-verk") setTimeout(renderBilanz, 0);
+});
+el("kb-verk-auto").addEventListener("click", () => {
+  S.kz.verkaeufe = null; el("kb-verk").value = ""; renderBilanz(); kasseEntwurfSichern();
+});
+
+el("k-datum").addEventListener("change", async e => {
+  S.kz.d = e.target.value || heute();
+  kasseEntwurfSichern();
+  renderKasseKopf(); renderBilanz();
+  const v = barVerkaeufe(S.kz.d);
+  const p = {z:v.z, f:v.f};
+  if(v.f && !zeitraumGeladen(p) && Store.bereit()){
+    if(await zeitraumLaden(p)){ renderKasseKopf(); renderBilanz(); }
+  }
+});
+
+el("k-leeren").addEventListener("click", () => {
+  S.kz = leereZaehlung(S.kz && !S.kz.edit ? S.kz.d : heute());
+  kasseEntwurfLoeschen(); renderKasse();
+});
+
+el("k-save").addEventListener("click", async () => {
+  const k = S.kz;
+  const kasse = summeRp(k.kasse, NOM_KASSE);
+  if(!kasse){ el("k-hint").textContent = "Bitte zuerst das Geld in der Kasse zählen."; return; }
+  const v = barVerkaeufe(k.d);
+  const verk = k.verkaeufe == null ? v.rappen : k.verkaeufe;
+  const stock = summeRp(k.stock, NOM_STOCK);
+  const row = {
+    d:k.d, z:v.z, ts:k.editTs || Date.now(),
+    kasse:{...k.kasse}, stock:{...k.stock},
+    verkaeufe:verk, verkaeufeAuto:v.rappen, manuell: verk !== v.rappen,
+    summeKasse:kasse, summeStock:stock, ergebnis: kasse - verk - stock
+  };
+  const y = row.d.slice(0, 4);
+  let id = k.edit || newId();
+  if(k.edit && k.editY && k.editY !== y){
+    // Jahr gewechselt: alte Fassung im alten Jahr als gelöscht markieren
+    const alt = (S.kasse[k.editY] || {})[k.edit];
+    if(alt){
+      S.kasse[k.editY] = {...S.kasse[k.editY], [k.edit]: {...alt, del:1}};
+      await schreibe({path:"kasse/" + k.editY + ".json", id:k.edit, row:{...alt, del:1}});
+    }
+    id = newId();
+  }
+  S.kasse[y] = {...(S.kasse[y] || {}), [id]: row};
+  cacheSave();
+  meldung((k.edit ? "Zählung geändert" : "Zählung gespeichert") + " – Ergebnis " + rp(row.ergebnis));
+  S.kz = leereZaehlung(k.d);
+  kasseEntwurfLoeschen();
+  renderKasse(); renderTabCounts();
+  await schreibe({path:"kasse/" + y + ".json", id, row});
+  renderKasseListe();
+});
+
+el("k-delete").addEventListener("click", async () => {
+  const k = S.kz; if(!k.edit) return;
+  const alt = (S.kasse[k.editY] || {})[k.edit]; if(!alt) return;
+  if(!confirm("Zählung vom " + fmtDatum4(alt.d) + " löschen?")) return;
+  const y = k.editY, id = k.edit;
+  S.kasse[y] = {...S.kasse[y], [id]: {...alt, del:1}};
+  cacheSave(); meldung("Zählung gelöscht");
+  S.kz = leereZaehlung(); kasseEntwurfLoeschen();
+  renderKasse(); renderTabCounts();
+  await schreibe({path:"kasse/" + y + ".json", id, row:{...alt, del:1}});
+  renderKasseListe();
+});
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-kedit]"); if(!b) return;
+  const r = (S.kasse[b.dataset.y] || {})[b.dataset.kedit]; if(!r) return;
+  // Gespeicherte Verkäufe bleiben fest, damit die Zählung so erscheint, wie sie war
+  S.kz = {d:r.d, kasse:{...(r.kasse || {})}, stock:{...(r.stock || {})}, verkaeufe:r.verkaeufe,
+          edit:b.dataset.kedit, editY:b.dataset.y, editTs:r.ts};
+  kasseEntwurfSichern();
+  renderKasse();
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+
+/* ============================================================
+   Abrechnung pro Zeitraum
+   ============================================================ */
+function zeitraumListe(){
+  const h = heute();
+  const aktuell = zeitraumFenster(zeitraumFor(h), h);
+  const out = [];
+  let [y, m] = aktuell.von.split("-").map(Number);
+  for(let i = 0; i < 120; i++){
+    const von = y + "-" + p2(m) + "-16";
+    const z = zeitraumFor(von);
+    const f = zeitraumFenster(z, von);
+    if(f.bis < DATEN_AB) break;
+    out.push({von, z, f, titel: zeitraumTitel(z, f)});
+    m--; if(m < 1){ m = 12; y--; }
+  }
+  return out;
+}
+function gewaehlterZeitraum(){
+  const liste = zeitraumListe();
+  return liste.find(p => p.von === S.abrVon) || liste[0];
+}
+
+function zeitraumGeladen(p){
+  const monate = [p.f.von.slice(0, 7), p.f.bis.slice(0, 7)];
+  const jahre  = [p.f.von.slice(0, 4), p.f.bis.slice(0, 4)];
+  return monate.every(mo => S.loaded.includes(mo)) && jahre.every(j => S.abos[j] && S.kasse[j]);
+}
+async function zeitraumLaden(p){
+  if(!Store.bereit()) return false;
+  let neu = false;
+  for(const mo of new Set([p.f.von.slice(0, 7), p.f.bis.slice(0, 7)]))
+    if(!S.loaded.includes(mo)){ await ladeMonat(mo); neu = true; }
+  for(const j of new Set([p.f.von.slice(0, 4), p.f.bis.slice(0, 4)])){
+    if(!S.abos[j]){ await ladeAbos(j); neu = true; }
+    if(!S.kasse[j]){ await ladeKasse(j); neu = true; }
+  }
+  return neu;
+}
+
+function abrechnungDaten(p){
+  const fahrten = alleFahrten().filter(r => imZeitraum(r, p.z, p.f));
+  const abos    = alleAbos().filter(r => imZeitraum(r, p.z, p.f));
+  const kassen  = alleKassen().filter(r => imZeitraum(r, p.z, p.f))
+                              .sort((a, b)=> a.d !== b.d ? (a.d < b.d ? -1 : 1) : (a.ts || 0) - (b.ts || 0));
+  const einsaetze = [];
+  for(const r of fahrten){
+    const key = r.d + "|" + r.s;
+    let e = einsaetze.find(x => x.key === key);
+    if(!e){ e = {key, d:r.d, s:r.s, b:0, t:0, a:0, m:0, k:0, fahrten:0}; einsaetze.push(e); }
+    for(const x of ["b","t","a","m","k"]) e[x] += (r[x] || 0);
+    e.fahrten++;
+  }
+  einsaetze.sort((x, y)=> x.d !== y.d ? (x.d < y.d ? -1 : 1) : String(x.s).localeCompare(String(y.s)));
+  const tot = {b:0, t:0, a:0, m:0, k:0, fahrten:fahrten.length};
+  einsaetze.forEach(e => { for(const x of ["b","t","a","m","k"]) tot[x] += e[x]; });
+  tot.pax = tot.b + tot.t + tot.a + tot.m + tot.k;
+
+  const aboZeilen = abos.map(r => ({
+    d:r.d, nr:r.nr || "",
+    bar10: r.typ !== "M" && r.zahl === "bar" ? 1 : 0,
+    barM:  r.typ === "M" && r.zahl === "bar" ? 1 : 0,
+    twint: r.zahl === "twint" ? 1 : 0,
+    a10:   r.typ !== "M" ? 1 : 0,
+    aM:    r.typ === "M" ? 1 : 0
+  })).sort((x, y)=> x.d < y.d ? -1 : x.d > y.d ? 1 : 0);
+  const aTot = {bar10:0, barM:0, twint:0, a10:0, aM:0};
+  aboZeilen.forEach(z => { for(const x in aTot) aTot[x] += z[x]; });
+
+  const barEF  = tot.b * TARIF.einzelfahrt;
+  const barAbo = aTot.bar10 * TARIF.abo10 + aTot.barM * TARIF.aboMonat;
+  const twintEF  = tot.t * TARIF.einzelfahrt;
+  const twintAbo = aboZeilen.reduce((s, z)=> s + (z.twint ? (z.aM ? TARIF.aboMonat : TARIF.abo10) : 0), 0);
+  return {p, einsaetze, tot, aboZeilen, aTot, barEF, barAbo, twintEF, twintAbo, kassen,
+          vollstaendig: zeitraumGeladen(p)};
+}
+
+function abrechnungHtml(a){
+  const z0 = v => v ? v : '<span class="null">–</span>';
+  let h = "";
+  if(!a.vollstaendig) h += '<p class="note">Die Daten dieses Zeitraums werden geladen …</p>';
+
+  h += '<div class="sum" style="margin-top:12px">' +
+    '<div><b class="num">' + a.einsaetze.length + '</b><small>Einsätze</small></div>' +
+    '<div><b class="num">' + a.tot.fahrten + '</b><small>Fahrten</small></div>' +
+    '<div><b class="num">' + a.tot.pax + '</b><small>Passagiere</small></div>' +
+    '<div><b class="num">' + chf(a.barEF + a.barAbo) + '</b><small>Bar total</small></div>' +
+  '</div>';
+
+  h += '<h3 class="k-titel">Fahrten nach Einsatz</h3><div class="tabelle-rahmen"><table class="abr"><thead><tr>' +
+       '<th class="l">Datum</th><th class="l">Schicht</th><th>Bar</th><th>Twint</th><th>10er-Abo</th>' +
+       '<th>Jahres-/Monatsabo</th><th>Kind/gratis</th><th>Passagiere</th></tr></thead><tbody>';
+  h += a.einsaetze.length
+    ? a.einsaetze.map(e => '<tr><td class="l">' + wochentag(e.d) + " " + fmtDate(e.d) + '</td><td class="l">' + esc(e.s) +
+        '</td><td>' + z0(e.b) + '</td><td>' + z0(e.t) + '</td><td>' + z0(e.a) + '</td><td>' + z0(e.m) +
+        '</td><td>' + z0(e.k) + '</td><td><b>' + (e.b + e.t + e.a + e.m + e.k) + '</b></td></tr>').join("")
+    : '<tr><td class="l" colspan="8" style="color:var(--ink3)">Keine Fahrten in diesem Zeitraum.</td></tr>';
+  h += '<tr class="total"><td class="l">Gesamtergebnis</td><td></td><td>' + a.tot.b + '</td><td>' + a.tot.t +
+       '</td><td>' + a.tot.a + '</td><td>' + a.tot.m + '</td><td>' + a.tot.k + '</td><td>' + a.tot.pax + '</td></tr>';
+  h += '</tbody></table></div>';
+
+  h += '<h3 class="k-titel">Abo-Verkäufe</h3><div class="tabelle-rahmen"><table class="abr"><thead><tr>' +
+       '<th class="l">Datum</th><th class="l">Abo-Nr</th><th>10er bar</th><th>Monat bar</th><th>Twint</th>' +
+       '<th>10er-Abo</th><th>Monatsabo</th></tr></thead><tbody>';
+  h += a.aboZeilen.length
+    ? a.aboZeilen.map(z => '<tr><td class="l">' + fmtDate(z.d) + '</td><td class="l">' + esc(z.nr) + '</td><td>' +
+        z0(z.bar10) + '</td><td>' + z0(z.barM) + '</td><td>' + z0(z.twint) + '</td><td>' + z0(z.a10) +
+        '</td><td>' + z0(z.aM) + '</td></tr>').join("")
+    : '<tr><td class="l" colspan="7" style="color:var(--ink3)">Keine Abos verkauft.</td></tr>';
+  h += '<tr class="total"><td class="l">Gesamtergebnis</td><td></td><td>' + a.aTot.bar10 + '</td><td>' + a.aTot.barM +
+       '</td><td>' + a.aTot.twint + '</td><td>' + a.aTot.a10 + '</td><td>' + a.aTot.aM + '</td></tr>';
+  h += '</tbody></table></div>';
+
+  h += '<h3 class="k-titel">Beträge</h3><div class="bilanz">' +
+    '<div class="bilanz-z"><span>Barbetrag Einzelfahrten<small>' + a.tot.b + ' × 4.–</small></span><b>' + chf(a.barEF) + '</b></div>' +
+    '<div class="bilanz-z"><span>Barbetrag Abos<small>' + a.aTot.bar10 + ' × 35.– + ' + a.aTot.barM + ' × 60.–</small></span><b>' + chf(a.barAbo) + '</b></div>' +
+    '<div class="bilanz-z ergebnis"><span>Bar total</span><b>' + chf(a.barEF + a.barAbo) + '</b></div>' +
+  '</div>' +
+  '<p class="note">Nicht in bar, zur Information: Twint Einzelfahrten ' + chf(a.twintEF) + ', Twint Abos ' + chf(a.twintAbo) + '.</p>';
+
+  h += '<h3 class="k-titel">Kassenzählungen im Zeitraum</h3>';
+  h += a.kassen.length
+    ? '<div class="tabelle-rahmen"><table class="abr"><thead><tr><th class="l">Datum</th><th>Kasse</th>' +
+      '<th>Verkäufe</th><th>Mein Stock</th><th>Ergebnis</th></tr></thead><tbody>' +
+      a.kassen.map(k => '<tr><td class="l">' + wochentag(k.d) + " " + fmtDate(k.d) + '</td><td>' + rp(k.summeKasse) +
+        '</td><td>' + rp(k.verkaeufe) + '</td><td>' + rp(k.summeStock) + '</td><td><b>' + rp(k.ergebnis) +
+        '</b></td></tr>').join("") +
+      '</tbody></table></div>'
+    : '<p class="empty">Keine Kassenzählung in diesem Zeitraum.</p>';
+  return h;
+}
+
+function renderAbrechnung(){
+  const liste = zeitraumListe();
+  if(!S.abrVon || !liste.some(p => p.von === S.abrVon)) S.abrVon = liste[0].von;
+  const sel = el("abr-zeitraum");
+  if(sel.options.length !== liste.length || sel.options[0].value !== liste[0].von){
+    sel.innerHTML = liste.map((p, i) => '<option value="' + p.von + '">' + esc(p.titel) +
+      (i === 0 ? " – laufend" : "") + '</option>').join("");
+  }
+  sel.value = S.abrVon;
+  const p = liste.find(x => x.von === S.abrVon);
+  el("abr-body").innerHTML = abrechnungHtml(abrechnungDaten(p));
+}
+
+async function abrechnungOeffnen(){
+  renderAbrechnung();
+  const p = gewaehlterZeitraum();
+  if(p && !zeitraumGeladen(p) && Store.bereit()){
+    if(await zeitraumLaden(p)) renderAbrechnung();
+  }
+}
+
+function ansichtWechsel(v){
+  S.abrAnsicht = v;
+  el("sub-abr").setAttribute("aria-pressed", String(v === "abr"));
+  el("sub-journal").setAttribute("aria-pressed", String(v === "journal"));
+  el("ansicht-abr").hidden = v !== "abr";
+  el("ansicht-journal").hidden = v !== "journal";
+}
+el("sub-abr").addEventListener("click", () => ansichtWechsel("abr"));
+el("sub-journal").addEventListener("click", () => ansichtWechsel("journal"));
+el("abr-zeitraum").addEventListener("change", e => { S.abrVon = e.target.value; abrechnungOeffnen(); });
+
+
+/* ============================================================
+   PDF – jsPDF wird beim Öffnen von Kasse oder Abrechnung vorgeladen,
+   damit der Knopfdruck das Teilen-Menü direkt öffnen darf.
+   ============================================================ */
+const PDF_BIBLIOTHEKEN = [
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+];
+let pdfVersprechen = null;
+function pdfLaden(){
+  if(pdfVersprechen) return pdfVersprechen;
+  pdfVersprechen = PDF_BIBLIOTHEKEN.reduce((kette, src) => kette.then(() => new Promise((ok, fehler) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = ok; s.onerror = () => fehler(new Error(src));
+    document.head.appendChild(s);
+  })), Promise.resolve()).catch(e => { pdfVersprechen = null; throw e; });
+  return pdfVersprechen;
+}
+function pdfBereit(){
+  return !!(window.jspdf && window.jspdf.jsPDF && window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable);
+}
+/** Liegt die Bibliothek noch nicht bereit, wird sie geladen und um einen zweiten Tipp gebeten. */
+async function pdfVorbereiten(hinweis){
+  if(pdfBereit()) return true;
+  hinweis.textContent = "PDF-Werkzeug wird geladen …";
+  try{
+    await pdfLaden();
+    hinweis.textContent = "";
+    meldung("PDF bereit – bitte nochmals tippen");
+  }catch(e){
+    hinweis.textContent = "Für das PDF braucht es eine Internetverbindung.";
+  }
+  return false;
+}
+
+/** PDF-Schriften kennen kein echtes Minuszeichen und keine Pfeile. */
+function pdfText(s){ return String(s).replace(/−/g, "-").replace(/→/g, "-"); }
+
+const PDF_TABELLE = {
+  theme:"grid",
+  styles:{font:"helvetica", fontSize:8.6, cellPadding:1.35, lineColor:[215,215,207], lineWidth:0.2,
+          textColor:[27,29,28], halign:"right", valign:"middle"},
+  headStyles:{fillColor:[246,246,241], textColor:[88,92,87], fontStyle:"bold", fontSize:7.5, halign:"right"},
+  footStyles:{fillColor:[250,238,190], textColor:[27,29,28], fontStyle:"bold", halign:"right"},
+  margin:{left:15, right:15}
+};
+function linksBis(anzahl){
+  return data => { if(data.column.index < anzahl) data.cell.styles.halign = "left"; };
+}
+
+function pdfNeu(titel, untertitel){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:"mm", format:"a4"});
+  doc.setFillColor(242, 194, 0); doc.rect(0, 0, 210, 5, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(27, 29, 28);
+  doc.text(pdfText(titel), 15, 20);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(88, 92, 87);
+  doc.text(pdfText(untertitel), 15, 27);
+  doc.setFontSize(8.5);
+  doc.text("eBuxi Herzogenbuchsee", 195, 18, {align:"right"});
+  const jetzt = new Date();
+  doc.text("erstellt " + fmtDatum4(iso(jetzt)) + ", " + p2(jetzt.getHours()) + ":" + p2(jetzt.getMinutes()), 195, 23, {align:"right"});
+  doc.setDrawColor(215, 215, 207); doc.setLineWidth(0.3); doc.line(15, 31, 195, 31);
+  return doc;
+}
+function pdfUeberschrift(doc, text, y, platz){
+  if(y + (platz || 20) > 280){ doc.addPage(); y = 20; }
+  doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(27, 29, 28);
+  doc.text(pdfText(text), 15, y);
+  return y + 2.5;
+}
+function pdfVisum(doc, y){
+  if(y > 280){ doc.addPage(); y = 30; }
+  doc.setDrawColor(138, 142, 134); doc.setLineWidth(0.25);
+  doc.line(15, y, 85, y); doc.line(115, y, 195, y);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(138, 142, 134);
+  doc.text("Datum", 15, y + 4); doc.text("Visum", 115, y + 4);
+}
+function pdfFuss(doc){
+  const n = doc.getNumberOfPages();
+  for(let i = 1; i <= n; i++){
+    doc.setPage(i);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(138, 142, 134);
+    doc.text("Seite " + i + " von " + n, 195, 289, {align:"right"});
+  }
+}
+
+function pdfAbrechnung(a){
+  const leer = v => v ? v : "";
+  const doc = pdfNeu("Fahrtenkontrolle eBuxi",
+    "Abrechnung " + a.p.titel + "  ·  " + fmtDatum4(a.p.f.von) + " bis " + fmtDatum4(a.p.f.bis));
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(27, 29, 28);
+  doc.text(a.einsaetze.length + " Einsätze  ·  " + a.tot.fahrten + " Fahrten  ·  " + a.tot.pax + " Passagiere", 15, 38);
+
+  let y = pdfUeberschrift(doc, "Fahrten nach Einsatz", 47);
+  doc.autoTable({...PDF_TABELLE, startY:y,
+    head:[["Datum", "Schicht", "Bar", "Twint", "10er-Abo", "Jahres-/Monatsabo", "Kind / gratis", "Passagiere"]],
+    body: a.einsaetze.length
+      ? a.einsaetze.map(e => [wochentag(e.d) + " " + fmtDatum4(e.d), String(e.s), leer(e.b), leer(e.t), leer(e.a),
+                              leer(e.m), leer(e.k), e.b + e.t + e.a + e.m + e.k])
+      : [["Keine Fahrten in diesem Zeitraum", "", "", "", "", "", "", ""]],
+    foot:[["Gesamtergebnis", "", a.tot.b, a.tot.t, a.tot.a, a.tot.m, a.tot.k, a.tot.pax]],
+    showFoot:"lastPage", didParseCell: linksBis(2)});
+
+  y = pdfUeberschrift(doc, "Abo-Verkäufe", doc.lastAutoTable.finalY + 7);
+  doc.autoTable({...PDF_TABELLE, startY:y,
+    head:[["Datum", "Abo-Nr", "10er bar", "Monat bar", "Twint", "10er-Abo", "Monatsabo"]],
+    body: a.aboZeilen.length
+      ? a.aboZeilen.map(z => [fmtDatum4(z.d), z.nr, leer(z.bar10), leer(z.barM), leer(z.twint), leer(z.a10), leer(z.aM)])
+      : [["Keine Abos verkauft", "", "", "", "", "", ""]],
+    foot:[["Gesamtergebnis", "", a.aTot.bar10, a.aTot.barM, a.aTot.twint, a.aTot.a10, a.aTot.aM]],
+    showFoot:"lastPage", didParseCell: linksBis(2)});
+
+  y = pdfUeberschrift(doc, "Beträge", doc.lastAutoTable.finalY + 7, 26);
+  doc.autoTable({...PDF_TABELLE, startY:y, margin:{left:15, right:75},
+    body:[
+      ["Barbetrag Einzelfahrten", a.tot.b + " × 4.–", chf(a.barEF)],
+      ["Barbetrag Abos", a.aTot.bar10 + " × 35.– + " + a.aTot.barM + " × 60.–", chf(a.barAbo)]
+    ],
+    foot:[["Bar total", "", chf(a.barEF + a.barAbo)]],
+    didParseCell: linksBis(2)});
+  y = doc.lastAutoTable.finalY + 5;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(88, 92, 87);
+  doc.text("Nicht in bar, zur Information: Twint Einzelfahrten " + chf(a.twintEF) + ", Twint Abos " + chf(a.twintAbo) + ".", 15, y);
+
+  const kassenPlatz = 6 + (a.kassen.length ? 6 + a.kassen.length * 5.2 : 6) + 20;
+  y = pdfUeberschrift(doc, "Kassenzählungen im Zeitraum", y + 8, kassenPlatz);
+  if(a.kassen.length){
+    doc.autoTable({...PDF_TABELLE, startY:y,
+      head:[["Datum", "Kasse", "Verkäufe", "Mein Stock", "Ergebnis"]],
+      body: a.kassen.map(k => [wochentag(k.d) + " " + fmtDatum4(k.d), pdfText(rp(k.summeKasse)),
+                               pdfText(rp(k.verkaeufe)), pdfText(rp(k.summeStock)), pdfText(rp(k.ergebnis))]),
+      didParseCell: linksBis(1)});
+    y = doc.lastAutoTable.finalY;
+  }else{
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(138, 142, 134);
+    doc.text("Keine Kassenzählung in diesem Zeitraum.", 15, y + 4);
+    y += 6;
+  }
+  pdfVisum(doc, y + 16);
+  pdfFuss(doc);
+  return doc;
+}
+
+function pdfKasse(){
+  const k = S.kz;
+  const v = barVerkaeufe(k.d);
+  const kasse = summeRp(k.kasse, NOM_KASSE), stock = summeRp(k.stock, NOM_STOCK);
+  const verk = k.verkaeufe == null ? v.rappen : k.verkaeufe;
+  const doc = pdfNeu("Kassenzählung eBuxi",
+    wochentagLang(k.d) + ", " + fmtDatum4(k.d) + "  ·  Zeitraum " + zeitraumTitel(v.z, v.f));
+
+  const zeilen = (liste, werte) => liste.map(n => [n.name, werte[n.k] || "",
+    werte[n.k] ? pdfText(rp(werte[n.k] * n.rp)) : ""]);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(27, 29, 28);
+  doc.text("Kasse", 15, 40);
+  doc.text("Mein Stock", 110, 40);
+  doc.autoTable({...PDF_TABELLE, startY:42.5, margin:{left:15, right:110},
+    head:[["Stückelung", "Anzahl", "Betrag"]], body: zeilen(NOM_KASSE, k.kasse),
+    foot:[["Total", "", pdfText(rp(kasse))]], didParseCell: linksBis(1)});
+  const yLinks = doc.lastAutoTable.finalY;
+  doc.autoTable({...PDF_TABELLE, startY:42.5, margin:{left:110, right:15},
+    head:[["Stückelung", "Anzahl", "Betrag"]], body: zeilen(NOM_STOCK, k.stock),
+    foot:[["Total", "", pdfText(rp(stock))]], didParseCell: linksBis(1)});
+  let y = pdfUeberschrift(doc, "Ergebnis", Math.max(yLinks, doc.lastAutoTable.finalY) + 10);
+
+  const verkInfo = k.verkaeufe == null ? verkaufText(v) : "fester Betrag";
+  doc.autoTable({...PDF_TABELLE, startY:y,
+    body:[
+      ["Summe Stückelung", "alles Geld in der Kasse", pdfText(rp(kasse))],
+      ["- Aktuelle Verkäufe", pdfText(verkInfo), "- " + pdfText(rp(verk))],
+      ["- Mein Stock", "eigenes Wechselgeld", "- " + pdfText(rp(stock))]
+    ],
+    foot:[["Ergebnis", "", pdfText(rp(kasse - verk - stock))]],
+    didParseCell: linksBis(2)});
+  y = doc.lastAutoTable.finalY + 6;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(88, 92, 87);
+  doc.text("Stock von eBuxi ist 150.–", 15, y);
+  pdfVisum(doc, y + 22);
+  pdfFuss(doc);
+  return doc;
+}
+
+/** Auf Handy und iPad über das Teilen-Menü, am PC als Download. */
+async function pdfAusgeben(doc, dateiname){
+  const blob = doc.output("blob");
+  const mobil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if(mobil && navigator.canShare){
+    const datei = new File([blob], dateiname, {type:"application/pdf"});
+    if(navigator.canShare({files:[datei]})){
+      try{ await navigator.share({files:[datei], title:dateiname}); return; }
+      catch(e){ if(e && e.name === "AbortError") return; }
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = dateiname;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 5000);
+}
+function dateiName(s){ return s.replace(/[\/\s]+/g, "_").replace(/[^\w.\-]/g, ""); }
+
+el("abr-pdf").addEventListener("click", async () => {
+  if(!await pdfVorbereiten(el("abr-hint"))) return;
+  const p = gewaehlterZeitraum();
+  if(!zeitraumGeladen(p)){ el("abr-hint").textContent = "Die Daten dieses Zeitraums sind noch nicht geladen."; return; }
+  el("abr-hint").textContent = "";
+  const doc = pdfAbrechnung(abrechnungDaten(p));
+  await pdfAusgeben(doc, dateiName("eBuxi_Abrechnung_" + p.titel.replace("/", "-") + ".pdf"));
+});
+el("k-pdf").addEventListener("click", async () => {
+  if(!await pdfVorbereiten(el("k-hint"))) return;
+  if(!summeRp(S.kz.kasse, NOM_KASSE)){ el("k-hint").textContent = "Bitte zuerst das Geld in der Kasse zählen."; return; }
+  el("k-hint").textContent = "";
+  await pdfAusgeben(pdfKasse(), "eBuxi_Kassenzaehlung_" + S.kz.d + ".pdf");
+});
+
 /* ---------- Start ---------- */
 cacheLoad();
+kasseEntwurfLaden();
 if(!S.zeitraeume.length) S.zeitraeume = MON.map((m,i)=> m+"/"+MON[(i+1)%12]);
 if(!S.kopf.z) S.kopf.z = zeitraumFor(S.kopf.d);
 renderAll();
