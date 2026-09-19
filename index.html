@@ -308,6 +308,13 @@ table.abr .null{color:var(--ink3)}
   .btn-main{min-width:0;padding:10px 8px}
   .btn-main b{font-size:15px}
 }
+.nrliste{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.nr{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-strong);
+  border-radius:999px;padding:4px 5px 4px 11px;background:var(--surface)}
+.nr b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13.5px;font-weight:600}
+.nr button{width:24px;height:24px;border:0;border-radius:50%;background:var(--sunk);
+  color:var(--ink2);font-size:12px;line-height:1;display:grid;place-items:center}
+.nr button:hover{background:var(--warn);color:var(--surface)}
 .btn-pdf{background:var(--ink);color:var(--surface);border-color:var(--ink);white-space:nowrap}
 .btn-pdf:disabled{opacity:.5;cursor:default}
 </style>
@@ -433,7 +440,21 @@ table.abr .null{color:var(--ink3)}
         <div class="card">
           <h3>Nummern-Bestand</h3>
           <div class="sum" id="a-bestand"></div>
-          <p class="note" id="a-bestand-note">Verkaufte Nummern verschwinden aus der Liste.</p>
+          <div class="chips" style="margin-top:11px" id="b-art">
+            <button type="button" class="chip mini" data-art="zehner" aria-pressed="true">10er-Karten</button>
+            <button type="button" class="chip mini" data-art="monats" aria-pressed="false">Monatsabos</button>
+          </div>
+          <div class="nrliste" id="b-liste"></div>
+          <div class="bar-inline" style="align-items:flex-end">
+            <label class="f" style="flex:2;min-width:8em"><span class="lbl">Neue Nummer</span>
+              <input type="text" id="b-neu" placeholder="25-14311" autocapitalize="none" spellcheck="false"></label>
+            <label class="f" style="width:5em"><span class="lbl">Anzahl</span>
+              <input type="text" inputmode="numeric" id="b-anzahl" value="1"></label>
+            <button class="btn" id="b-add">Erfassen</button>
+          </div>
+          <p class="hint" id="b-hint"></p>
+          <p class="note">Verkaufte Nummern verschwinden von selbst aus der Liste. Bei
+            «Anzahl» mehr als 1 wird durchgezählt: 25-14311, 25-14312 und so weiter.</p>
         </div>
         <div class="card">
           <h3 id="a-list-title">Verkaufte Abos</h3>
@@ -618,6 +639,8 @@ const S = {
   loaded:[],            // geladene Monatsschlüssel
   tab:"fahrt", jSuche:"",
   kasse:{},             // jahr -> {id:row}
+  bestandArt:"zehner",  // welche Nummernliste gerade gezeigt wird
+  bestandOffen:false,   // Bestandsänderung wartet noch auf GitHub
   kz:null,              // Kassenzählung in Arbeit
   abrVon:"", abrAnsicht:"abr"
 };
@@ -735,6 +758,7 @@ function cacheSave(){
   try{
     localStorage.setItem(LS, JSON.stringify({
       fahrten:S.fahrten, abos:S.abos, kasse:S.kasse, bestand:S.bestand, outbox:S.outbox,
+      bestandOffen:S.bestandOffen,
       kopf:S.kopf, loaded:S.loaded,
       stamm:{strassen:S.strassen, schichten:S.schichten, zeitraeume:S.zeitraeume, top:S.top}
     }));
@@ -747,6 +771,7 @@ function cacheLoad(){
     if(c.fahrten) S.fahrten=c.fahrten;
     if(c.abos) S.abos=c.abos;
     if(c.kasse) S.kasse=c.kasse;
+    if(c.bestandOffen) S.bestandOffen=true;
     if(c.bestand) S.bestand=c.bestand;
     if(Array.isArray(c.outbox)) S.outbox=c.outbox;
     if(Array.isArray(c.loaded)) S.loaded=c.loaded;
@@ -974,7 +999,7 @@ async function flush(){
   }
   flushing = false; syncText();
 }
-setInterval(()=>{ if(S.outbox.length) flush(); }, 20000);
+setInterval(()=>{ if(S.outbox.length) flush(); if(S.bestandOffen) bestandNachtragen(); }, 20000);
 window.addEventListener("online", flush);
 
 /** Holt laufenden und vorigen Monat neu, falls ein anderes Geraet geschrieben hat. */
@@ -992,12 +1017,47 @@ async function pollen(){
 setInterval(pollen, 60000);
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ flush(); pollen(); } });
 
-async function bestandSchreiben(next){
-  S.bestand = next; cacheSave();
-  if(!Store.bereit()) return;
+/**
+ * Ändert eine Nummernliste. aendern() bekommt die Liste und gibt die neue zurück;
+ * dieselbe Änderung wird auf den Stand von GitHub angewendet, damit ein Verkauf
+ * auf einem anderen Gerät nicht überschrieben wird.
+ */
+async function bestandAendern(art, aendern, nachricht){
+  S.bestand = {...S.bestand, [art]: aendern(S.bestand[art] || [])};
+  cacheSave();
+  if(!Store.bereit()){ S.bestandOffen = true; cacheSave(); return false; }
   const g = await Store.hole("bestand/abonr.json", false);
-  if(g.status==="offline" || g.status==="kein-zugriff") return;
-  await Store.lege("bestand/abonr.json", next, g.sha, "EBuxi: Abo-Bestand aktualisiert");
+  if(["offline","kein-zugriff","fehler"].includes(g.status)){ S.bestandOffen = true; cacheSave(); return false; }
+  const fern = g.status === "ok" && g.daten
+    ? {zehner:g.daten.zehner || [], monats:g.daten.monats || []}
+    : {zehner:[], monats:[]};
+  fern[art] = aendern(fern[art] || []);
+  const p = await Store.lege("bestand/abonr.json", fern, g.sha, nachricht || "EBuxi: Abo-Bestand aktualisiert");
+  if(p.status === "ok"){ S.bestand = fern; S.bestandOffen = false; }
+  else S.bestandOffen = true;
+  cacheSave();
+  return p.status === "ok";
+}
+
+/** Nachzügler: eine Änderung, die offline entstanden ist, später doch noch senden. */
+async function bestandNachtragen(){
+  if(!S.bestandOffen || !Store.bereit()) return;
+  const g = await Store.hole("bestand/abonr.json", false);
+  if(["offline","kein-zugriff","fehler"].includes(g.status)) return;
+  const p = await Store.lege("bestand/abonr.json",
+    {zehner:S.bestand.zehner || [], monats:S.bestand.monats || []}, g.sha,
+    "EBuxi: Abo-Bestand nachgetragen");
+  if(p.status === "ok"){ S.bestandOffen = false; cacheSave(); syncText(); }
+}
+
+/** "25-14311" plus Anzahl 3 ergibt 25-14311, 25-14312, 25-14313. */
+function nummernFolge(start, anzahl){
+  const m = String(start || "").trim().match(/^(.*?)(\d+)$/);
+  if(!m) return null;
+  const kopf = m[1], breite = m[2].length, zahl = parseInt(m[2], 10);
+  const out = [];
+  for(let i = 0; i < anzahl; i++) out.push(kopf + String(zahl + i).padStart(breite, "0"));
+  return out;
 }
 
 /* ---------- Einrichtung ---------- */
@@ -1238,9 +1298,7 @@ function renderAbo(){
       : '<option value="">— keine freie Nummer —</option>';
     el("a-nr").disabled = !frei.length;
   }
-  el("a-bestand").innerHTML =
-    '<div><b class="num">'+S.bestand.zehner.length+'</b><small>10er frei</small></div>'+
-    '<div><b class="num">'+S.bestand.monats.length+'</b><small>Monats frei</small></div>';
+  renderBestand();
   const preis = a.typ==="M"? TARIF.aboMonat : TARIF.abo10;
   el("a-save-sub").textContent = (a.typ==="M"?"Monatsabo":"10er-Abo")+" · "+chf(preis)+" · "+(a.zahl==="twint"?"Twint":"bar")+(a.nr? " · Nr "+a.nr : "");
   el("a-save").querySelector("b").textContent = a.edit? "Änderung speichern" : "Abo speichern";
@@ -1262,6 +1320,20 @@ function renderAbo(){
   const bar = list.filter(r=>r.zahl==="bar").reduce((s,r)=>s+(r.typ==="M"?TARIF.aboMonat:TARIF.abo10),0);
   const tw  = list.filter(r=>r.zahl==="twint").reduce((s,r)=>s+(r.typ==="M"?TARIF.aboMonat:TARIF.abo10),0);
   el("a-money").innerHTML = list.length? zeile("Bar","",chf(bar))+zeile("Twint","",chf(tw)) : "";
+}
+
+function renderBestand(){
+  const art = S.bestandArt === "monats" ? "monats" : "zehner";
+  el("a-bestand").innerHTML =
+    '<div><b class="num">' + (S.bestand.zehner || []).length + '</b><small>10er frei</small></div>' +
+    '<div><b class="num">' + (S.bestand.monats || []).length + '</b><small>Monats frei</small></div>';
+  el("b-art").querySelectorAll(".chip").forEach(c =>
+    c.setAttribute("aria-pressed", String(c.dataset.art === art)));
+  const liste = S.bestand[art] || [];
+  el("b-liste").innerHTML = liste.length
+    ? liste.map(n => '<span class="nr"><b>' + esc(n) + '</b>' +
+        '<button type="button" data-weg="' + esc(n) + '" aria-label="' + esc(n) + ' entfernen">✕</button></span>').join("")
+    : '<p class="empty">Keine freie Nummer – unten neue erfassen.</p>';
 }
 
 function renderJournal(){
@@ -1476,6 +1548,44 @@ el("a-zahl").addEventListener("click", e=>{
   S.abo.zahl=c.dataset.zahl; renderAbo();
 });
 el("a-nr").addEventListener("change", e=>{ S.abo.nr=e.target.value; renderAbo(); });
+
+el("b-art").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if(!c) return;
+  S.bestandArt = c.dataset.art; renderBestand();
+});
+el("b-liste").addEventListener("click", async e => {
+  const b = e.target.closest("[data-weg]"); if(!b) return;
+  const nr = b.dataset.weg, art = S.bestandArt === "monats" ? "monats" : "zehner";
+  if(!confirm("Nummer " + nr + " aus dem Bestand entfernen?")) return;
+  const ok = await bestandAendern(art, l => l.filter(x => x !== nr), "EBuxi: Nummer " + nr + " entfernt");
+  renderAbo(); renderTabCounts();
+  el("b-hint").textContent = ok ? "" : "Noch nicht gesendet – die App versucht es gleich nochmals.";
+});
+el("b-add").addEventListener("click", async () => {
+  const art = S.bestandArt === "monats" ? "monats" : "zehner";
+  const start = el("b-neu").value.trim();
+  const anzahl = Math.max(1, Math.min(200, parseInt(el("b-anzahl").value, 10) || 1));
+  if(!start){ el("b-hint").textContent = "Bitte eine Nummer eingeben."; return; }
+  const folge = nummernFolge(start, anzahl);
+  if(!folge){ el("b-hint").textContent = "Die Nummer muss auf eine Ziffer enden, z. B. 25-14311."; return; }
+  const schon = new Set([...(S.bestand.zehner || []), ...(S.bestand.monats || [])]);
+  const verkauft = new Set(alleAbos().map(a => String(a.nr)));
+  const neu = folge.filter(n => !schon.has(n) && !verkauft.has(n));
+  const weg = folge.length - neu.length;
+  if(!neu.length){
+    el("b-hint").textContent = folge.length === 1
+      ? "Diese Nummer gibt es schon oder sie ist bereits verkauft."
+      : "Alle " + folge.length + " Nummern gibt es schon oder sie sind verkauft.";
+    return;
+  }
+  const ok = await bestandAendern(art, l => [...l, ...neu.filter(n => !l.includes(n))],
+    "EBuxi: " + neu.length + (neu.length === 1 ? " Nummer" : " Nummern") + " in den Bestand");
+  el("b-neu").value = ""; el("b-anzahl").value = "1";
+  renderAbo(); renderTabCounts();
+  el("b-hint").textContent = weg ? weg + (weg === 1 ? " Nummer war schon da und wurde übersprungen." : " Nummern waren schon da und wurden übersprungen.") : "";
+  meldung(neu.length + (neu.length === 1 ? " Nummer erfasst" : " Nummern erfasst") +
+    (ok ? "" : " – wird noch gesendet"));
+});
 el("a-nr-frei").addEventListener("click", ()=>{
   const m = el("a-nr-manuell");
   m.hidden = !m.hidden;
@@ -1496,7 +1606,7 @@ el("a-save").addEventListener("click", async ()=>{
   // verkaufte Nummer aus dem Bestand nehmen
   const feld = a.typ==="M" ? "monats" : "zehner";
   if(S.bestand[feld].includes(a.nr)){
-    await bestandSchreiben({...S.bestand, [feld]: S.bestand[feld].filter(n=>n!==a.nr)});
+    await bestandAendern(feld, l => l.filter(n => n !== a.nr), "EBuxi: Abo " + a.nr + " verkauft");
   }
   cacheSave();
   meldung((a.typ==="M"?"Monatsabo":"10er-Abo")+" "+a.nr+" gespeichert");
@@ -1512,7 +1622,8 @@ el("a-delete").addEventListener("click", async ()=>{
   S.abos[y]={...(S.abos[y]||{}), [id]:{...alt, del:1}};
   const feld = alt.typ==="M"?"monats":"zehner";
   if(alt.nr && !S.bestand[feld].includes(alt.nr))
-    await bestandSchreiben({...S.bestand, [feld]:[alt.nr, ...S.bestand[feld]]});
+    await bestandAendern(feld, l => l.includes(alt.nr) ? l : [alt.nr, ...l],
+      "EBuxi: Abo " + alt.nr + " zurück in den Bestand");
   cacheSave(); meldung("Abo gelöscht");
   S.abo={typ:alt.typ, nr:"", zahl:alt.zahl, edit:null};
   renderAll();

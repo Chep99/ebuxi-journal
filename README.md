@@ -7,7 +7,7 @@ ohne Installation, direkt im Browser.
 | Reiter | Wozu |
 |---|---|
 | **Fahrt** | Fahrten erfassen: Abholung, Ziel, Passagiere nach Zahlart |
-| **Abo** | 10er- und Monatsabos verkaufen, Abo-Nummern aus dem Bestand |
+| **Abo** | 10er- und Monatsabos verkaufen; darunter der Nummern-Bestand: neue Karten erfassen (auch als Serie), falsche entfernen |
 | **Kasse** | Kassenzählung nach Stückelung, «Mein Stock», Verkäufe automatisch, Ergebnis, PDF |
 | **Abrechnung** | Zeitraum wählen, Einsätze, Abos, Barbeträge und Kassenzählungen sehen, PDF; darin auch die Fahrtenliste zum Nachschlagen und Korrigieren |
 
@@ -66,6 +66,13 @@ denselben Monat gefahrlos ergänzen können.
   `Vormonat/Monat`. Gegen alle 4531 Altzeilen geprüft, keine Abweichung.
 * **Tarife**: Einzelfahrt 4.–, 10er-Abo 35.–, Monatsabo 60.–.
 * **Schichten**: 1.1 – 1.4, 2.1, 2.2 und `Spez.`
+* **Einsatztag** wechselt erst um **02:00**: Was nach Mitternacht erfasst wird,
+  gehört zum Abend davor – Datum, Zeitraum und Auswertungen richten sich danach.
+* **Nummern-Bestand**: Beim Verkauf verschwindet die Nummer aus `bestand/abonr.json`,
+  beim Stornieren kommt sie zurück. Neue Karten lassen sich als Serie erfassen
+  (Startnummer plus Anzahl zählt durch). Geschrieben wird immer auf den frischen
+  Stand von GitHub, damit ein Verkauf auf einem anderen Gerät nicht verloren geht;
+  ohne Verbindung merkt sich die App die Änderung und trägt sie später nach.
 * **Kassenzählung** wie im Blatt KasseZählung: Summe Stückelung − aktuelle Verkäufe −
   Mein Stock = Ergebnis. «Aktuelle Verkäufe» rechnet die App selbst: Bar-Fahrten × 4.–
   plus bar verkaufte Abos, vom Beginn des Zeitraums bis und mit dem Zähltag. Der Betrag
