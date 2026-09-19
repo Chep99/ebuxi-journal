@@ -623,7 +623,15 @@ const S = {
 };
 
 /* ---------- kleine Helfer ---------- */
-function heute(){ const t=new Date(); return iso(t); }
+/** Der Einsatztag wechselt erst um 02:00, damit Fahrten nach Mitternacht
+ *  noch zum Abend davor gehören. Kein const auf oberster Ebene: heute()
+ *  wird schon beim Aufbau von S gebraucht, also bevor Konstanten bereitstehen. */
+function tagesDatum(jetzt){
+  const t = new Date(jetzt.getTime());
+  t.setHours(t.getHours() - 2);
+  return iso(t);
+}
+function heute(){ return tagesDatum(new Date()); }
 function iso(dt){ return dt.getFullYear()+"-"+p2(dt.getMonth()+1)+"-"+p2(dt.getDate()); }
 function p2(n){ return String(n).padStart(2,"0"); }
 function mk(d){ return d.slice(0,7); }
