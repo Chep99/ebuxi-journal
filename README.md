@@ -8,7 +8,7 @@ ohne Installation, direkt im Browser.
 |---|---|
 | **Fahrt** | Fahrten erfassen: Abholung, Ziel, Passagiere nach Zahlart |
 | **Abo** | 10er- und Monatsabos verkaufen; darunter der Nummern-Bestand: neue Karten erfassen (auch als Serie), falsche entfernen |
-| **Kasse** | Kassenzählung nach Stückelung, «Mein Stock», Verkäufe automatisch, Ergebnis, PDF |
+| **Kasse** | Kassenzählung nach Stückelung, «Mein Stock», Verkäufe automatisch, Ergebnis, PDF; darunter die Spesen, die aus der Kasse bezahlt wurden |
 | **Abrechnung** | Zeitraum wählen, Einsätze, Abos, Barbeträge und Kassenzählungen sehen, PDF; darin auch die Fahrtenliste zum Nachschlagen und Korrigieren |
 
 Ersetzt die Excel-Mappe `FahrtenJournal_Version_13_01.xlsm`.
@@ -48,7 +48,8 @@ abos/<JJJJ>.json         { rows: { id: {d,z,s,typ,nr,zahl,del} } }
 stamm/verweise.json      { strassen[], schichten[], zeitraeume[], top[], tarife{} }
 bestand/abonr.json       { zehner[], monats[] }
 kasse/<JJJJ>.json        { rows: { id: {d,z,ts,kasse{},stock{},verkaeufe,verkaeufeAuto,
-                                        manuell,summeKasse,summeStock,ergebnis,del} } }
+                                        manuell,spesen,summeKasse,summeStock,ergebnis,del} } }
+spesen/<JJJJ>.json       { rows: { id: {d,z,zweck,betrag,ts,del} } }
 ```
 
 Beträge der Kassenzählung stehen in **Rappen** (52700 = 527.–), damit keine
@@ -78,6 +79,13 @@ denselben Monat gefahrlos ergänzen können.
   plus bar verkaufte Abos, vom Beginn des Zeitraums bis und mit dem Zähltag. Der Betrag
   lässt sich von Hand überschreiben. «Mein Stock» wird wie in der Mappe nur mit 100er
   bis 1er gezählt.
+* **Spesen** werden immer aus der Kasse bezahlt. Darum fehlt ihr Betrag im gezählten
+  Geld und wird in der Zählung wieder **dazugerechnet**:
+  `Summe Stückelung + Spesen − Verkäufe − Mein Stock = Ergebnis`.
+  Gezählt werden die Spesen vom Beginn des Zeitraums bis und mit dem Zähltag, also
+  gleich wie die Verkäufe. Beim Speichern hält die Zählung den damals verwendeten
+  Betrag fest, damit eine alte Zählung später unverändert aussieht. Der Zweck ist
+  freier Text; bereits benutzte Zwecke erscheinen als Knöpfe zum Antippen.
 * **Abrechnung** wie im Blatt Fahrtabrechnung: Fahrten je Einsatz (Datum und Schicht),
   Abo-Verkäufe, Barbetrag Einzelfahrten (bar × 4.–), Barbetrag Abos (10er bar × 35.– +
   Monat bar × 60.–). Geprüft gegen die Mappe: Juli/Aug 2026 stimmt in allen Werten mit

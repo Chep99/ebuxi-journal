@@ -492,6 +492,7 @@ table.abr .null{color:var(--ink3)}
               <button type="button" class="linkbtn" id="kb-verk-auto" hidden>wieder automatisch</button>
             </span>
           </div>
+          <div class="bilanz-z" id="kb-spesen-zeile"><span>+ Spesen aus der Kasse<small id="kb-spesen-info"></small></span><b id="kb-spesen"></b></div>
           <div class="bilanz-z"><span>− Mein Stock<small>eigenes Wechselgeld</small></span><b id="kb-stock"></b></div>
           <div class="bilanz-z ergebnis"><span>Ergebnis</span><b id="kb-ergebnis"></b></div>
         </div>
@@ -511,6 +512,29 @@ table.abr .null{color:var(--ink3)}
           <h3>Als PDF</h3>
           <p style="font-size:14px;color:var(--ink2);margin:0 0 10px">Die Zählung, wie sie gerade auf dem Bildschirm steht – mit beiden Stückelungen und dem Ergebnis.</p>
           <button class="btn btn-pdf" id="k-pdf" style="width:100%">PDF dieser Zählung</button>
+        </div>
+        <div class="card">
+          <h3>Spesen <span class="lbl" style="font-family:'IBM Plex Sans',system-ui,sans-serif">aus der Kasse bezahlt</span></h3>
+          <div class="rows" id="sp-liste"></div>
+          <div id="sp-summe"></div>
+
+          <div class="head" style="margin-top:12px">
+            <div class="head-row">
+              <label class="f"><span class="lbl">Datum</span><input type="date" id="sp-datum"></label>
+              <label class="f" style="width:6.8em"><span class="lbl">Betrag</span>
+                <input type="text" inputmode="decimal" id="sp-betrag" placeholder="12.50"></label>
+            </div>
+            <label class="f" style="margin-top:9px"><span class="lbl">Wofür</span>
+              <input type="text" id="sp-zweck" placeholder="z. B. Reinigung" autocomplete="off"></label>
+            <div class="chips" id="sp-vorschlaege" style="margin-top:7px"></div>
+          </div>
+
+          <p class="hint" id="sp-hint"></p>
+          <div class="bar-inline">
+            <button class="btn btn-main" id="sp-save" style="flex:1"><b>Spese erfassen</b><small id="sp-save-sub">mindert das Geld in der Kasse</small></button>
+            <button class="btn" id="sp-abbruch" hidden>Abbrechen</button>
+            <button class="btn btn-del" id="sp-delete" hidden>Löschen</button>
+          </div>
         </div>
         <div class="card">
           <h3>Gespeicherte Zählungen</h3>
@@ -608,7 +632,8 @@ table.abr .null{color:var(--ink3)}
    abos/<JJJJ>.json        { rows: { id: {d,z,s,typ,nr,zahl,del} } }
    stamm/verweise.json     { strassen[], schichten[], zeitraeume[], top[], tarife{} }
    bestand/abonr.json      { zehner[], monats[] }
-   kasse/<JJJJ>.json       { rows: { id: {d,z,ts,kasse{},stock{},verkaeufe,ergebnis,del} } }
+   kasse/<JJJJ>.json       { rows: { id: {d,z,ts,kasse{},stock{},verkaeufe,spesen,ergebnis,del} } }
+   spesen/<JJJJ>.json      { rows: { id: {d,z,zweck,betrag,ts,del} } }
    Gelesen und geschrieben ueber die GitHub-Contents-API; jede Aenderung
    ist ein Commit. Eintraege sind nach Id verschluesselt abgelegt, damit
    zwei Geraete denselben Monat gefahrlos ergaenzen koennen.
@@ -639,6 +664,8 @@ const S = {
   loaded:[],            // geladene Monatsschlüssel
   tab:"fahrt", jSuche:"",
   kasse:{},             // jahr -> {id:row}
+  spesen:{},            // jahr -> {id:row}
+  sp:null,              // Spese in Arbeit
   bestandArt:"zehner",  // welche Nummernliste gerade gezeigt wird
   bestandOffen:false,   // Bestandsänderung wartet noch auf GitHub
   kz:null,              // Kassenzählung in Arbeit
@@ -757,7 +784,7 @@ function pax(r){ return (r.b||0)+(r.t||0)+(r.a||0)+(r.m||0)+(r.k||0); }
 function cacheSave(){
   try{
     localStorage.setItem(LS, JSON.stringify({
-      fahrten:S.fahrten, abos:S.abos, kasse:S.kasse, bestand:S.bestand, outbox:S.outbox,
+      fahrten:S.fahrten, abos:S.abos, kasse:S.kasse, spesen:S.spesen, bestand:S.bestand, outbox:S.outbox,
       bestandOffen:S.bestandOffen,
       kopf:S.kopf, loaded:S.loaded,
       stamm:{strassen:S.strassen, schichten:S.schichten, zeitraeume:S.zeitraeume, top:S.top}
@@ -771,6 +798,7 @@ function cacheLoad(){
     if(c.fahrten) S.fahrten=c.fahrten;
     if(c.abos) S.abos=c.abos;
     if(c.kasse) S.kasse=c.kasse;
+    if(c.spesen) S.spesen=c.spesen;
     if(c.bestandOffen) S.bestandOffen=true;
     if(c.bestand) S.bestand=c.bestand;
     if(Array.isArray(c.outbox)) S.outbox=c.outbox;
@@ -909,7 +937,9 @@ function outboxUeberlagern(){
     m = j.path.match(/^abos\/(.+)\.json$/);
     if(m){ S.abos[m[1]] = Object.assign({}, S.abos[m[1]]||{}, {[j.id]: j.row}); continue; }
     m = j.path.match(/^kasse\/(.+)\.json$/);
-    if(m){ S.kasse[m[1]] = Object.assign({}, S.kasse[m[1]]||{}, {[j.id]: j.row}); }
+    if(m){ S.kasse[m[1]] = Object.assign({}, S.kasse[m[1]]||{}, {[j.id]: j.row}); continue; }
+    m = j.path.match(/^spesen\/(.+)\.json$/);
+    if(m){ S.spesen[m[1]] = Object.assign({}, S.spesen[m[1]]||{}, {[j.id]: j.row}); }
   }
 }
 
@@ -956,6 +986,14 @@ async function ladeKasse(jahr, mitEtag){
   return g.status;
 }
 
+async function ladeSpesen(jahr, mitEtag){
+  const g = await Store.hole("spesen/"+jahr+".json", !!mitEtag);
+  if(g.status==="ok") S.spesen[jahr] = (g.daten && g.daten.rows) || {};
+  else if(g.status==="fehlt") S.spesen[jahr] = S.spesen[jahr] || {};
+  outboxUeberlagern(); cacheSave();
+  return g.status;
+}
+
 async function initStore(){
   Store.laden(); renderSetup();
   if(!Store.bereit()){ setSync("local","nicht eingerichtet"); tabWechsel("setup"); renderAll(); return; }
@@ -973,6 +1011,7 @@ async function initStore(){
   const jahr = Number(heute().slice(0,4));
   for(const y of [jahr-1, jahr]) await ladeAbos(String(y));
   for(const y of [jahr-1, jahr]) await ladeKasse(String(y));
+  for(const y of [jahr-1, jahr]) await ladeSpesen(String(y));
   renderAll(); syncText(); flush();
 }
 
@@ -1377,7 +1416,9 @@ function renderTabCounts(){
   el("tc-fahrt").textContent = heuteRows.length? heuteRows.length+" heute" : "erfassen";
   el("tc-abo").textContent = S.bestand.zehner.length+S.bestand.monats.length ? (S.bestand.zehner.length+S.bestand.monats.length)+" Nr frei" : "verkaufen";
   const letzte = alleKassen()[0];
-  el("tc-kasse").textContent = letzte ? "zuletzt "+fmtDate(letzte.d).slice(0,6) : "zählen";
+  const sp = S.kz ? spesenBis(S.kz.d) : spesenBis(heute());
+  el("tc-kasse").textContent = sp.rappen ? "Spesen " + rp(sp.rappen)
+    : (letzte ? "zuletzt " + fmtDate(letzte.d).slice(0, 6) : "zählen");
   el("tc-abrechnung").textContent = zeitraumFor(heute());
 }
 
@@ -1694,7 +1735,7 @@ function wochentagLang(d){
   return ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"][new Date(d+"T12:00:00").getDay()];
 }
 
-function leereZaehlung(d){ return {d: d || heute(), kasse:{}, stock:{}, verkaeufe:null, edit:null, editY:null}; }
+function leereZaehlung(d){ return {d: d || heute(), kasse:{}, stock:{}, verkaeufe:null, spesen:null, edit:null, editY:null}; }
 function summeRp(werte, liste){ return liste.reduce((s, n)=> s + (Number(werte[n.k]) || 0) * n.rp, 0); }
 
 function alleKassen(){
@@ -1770,7 +1811,13 @@ function renderBilanz(){
     ? verkaufText(v)
     : "fester Betrag · berechnet wären " + rp(v.rappen);
   el("kb-verk-auto").hidden = k.verkaeufe == null;
-  const ergebnis = kasse - verk - stock;
+  const sp = S.kz.spesen == null ? spesenBis(k.d).rappen : S.kz.spesen;
+  el("kb-spesen").textContent = rp(sp);
+  el("kb-spesen-info").textContent = sp
+    ? "liegen nicht mehr in der Kasse"
+    : "keine Spesen in diesem Zeitraum";
+  el("kb-spesen-zeile").style.opacity = sp ? "" : ".55";
+  const ergebnis = kasse + sp - verk - stock;
   el("kb-ergebnis").textContent = rp(ergebnis);
   el("k-save-sub").textContent = "Ergebnis " + rp(ergebnis);
 }
@@ -1795,7 +1842,7 @@ function renderKasse(){
   el("k-stock").innerHTML = zaehlTabelle("stock", NOM_STOCK, k.stock);
   el("kb-verk").value = "";
   renderBilanz();
-  renderKasseListe();
+  renderKasseListe(); renderSpesen();
   el("k-save").querySelector("b").textContent = k.edit ? "Änderung speichern" : "Zählung speichern";
   el("k-delete").hidden = !k.edit;
   el("k-leeren").textContent = k.edit ? "Abbrechen" : "Leeren";
@@ -1805,7 +1852,7 @@ function renderKasse(){
 /** Sanfte Aktualisierung: baut keine Eingabefelder neu, damit der Cursor bleibt. */
 function kasseAktualisieren(){
   if(!S.kz || !el("k-kasse").children.length){ renderKasse(); return; }
-  renderKasseKopf(); renderBilanz(); renderKasseListe();
+  renderKasseKopf(); renderBilanz(); renderKasseListe(); renderSpesen();
 }
 
 function zaehlZeileAktualisieren(zeile){
@@ -1874,12 +1921,13 @@ el("k-save").addEventListener("click", async () => {
   if(!kasse){ el("k-hint").textContent = "Bitte zuerst das Geld in der Kasse zählen."; return; }
   const v = barVerkaeufe(k.d);
   const verk = k.verkaeufe == null ? v.rappen : k.verkaeufe;
+  const spes = k.spesen == null ? spesenBis(k.d).rappen : k.spesen;
   const stock = summeRp(k.stock, NOM_STOCK);
   const row = {
     d:k.d, z:v.z, ts:k.editTs || Date.now(),
     kasse:{...k.kasse}, stock:{...k.stock},
     verkaeufe:verk, verkaeufeAuto:v.rappen, manuell: verk !== v.rappen,
-    summeKasse:kasse, summeStock:stock, ergebnis: kasse - verk - stock
+    spesen: spes, summeKasse:kasse, summeStock:stock, ergebnis: kasse + spes - verk - stock
   };
   const y = row.d.slice(0, 4);
   let id = k.edit || newId();
@@ -1920,10 +1968,145 @@ document.addEventListener("click", e => {
   const r = (S.kasse[b.dataset.y] || {})[b.dataset.kedit]; if(!r) return;
   // Gespeicherte Verkäufe bleiben fest, damit die Zählung so erscheint, wie sie war
   S.kz = {d:r.d, kasse:{...(r.kasse || {})}, stock:{...(r.stock || {})}, verkaeufe:r.verkaeufe,
+          spesen: r.spesen == null ? 0 : r.spesen,
           edit:b.dataset.kedit, editY:b.dataset.y, editTs:r.ts};
   kasseEntwurfSichern();
   renderKasse();
   window.scrollTo({top:0, behavior:"smooth"});
+});
+
+
+/* ============================================================
+   Spesen – aus der Kasse bezahlte Auslagen
+   spesen/<JJJJ>.json  { rows: { id: {d,z,zweck,betrag,ts,del} } }
+   Betrag in Rappen, wie bei der Kassenzählung.
+   ============================================================ */
+
+function alleSpesen(){
+  const out = [];
+  for(const y of Object.keys(S.spesen))
+    for(const [id, r] of Object.entries(S.spesen[y]))
+      if(r && !r.del) out.push({id, y, ...r});
+  return out.sort((a, b)=> a.d !== b.d ? (a.d < b.d ? 1 : -1) : (b.ts || 0) - (a.ts || 0));
+}
+
+/** Spesen vom Beginn des Zeitraums bis und mit dem Stichtag – gleicher Zeitraum wie die Verkäufe. */
+function spesenBis(datum){
+  const z = zeitraumFor(datum);
+  const f = zeitraumFenster(z, datum);
+  const liste = alleSpesen().filter(r => imZeitraum(r, z, f) && r.d <= datum);
+  return {liste, rappen: liste.reduce((s, r)=> s + (r.betrag || 0), 0), z, f};
+}
+
+function leereSpese(d){ return {d: d || heute(), zweck:"", betrag:null, edit:null, editY:null}; }
+
+/** Die bisher benutzten Zwecke, häufigste zuerst – wird mit jedem Eintrag besser. */
+function spesenVorschlaege(){
+  const zaehler = new Map();
+  for(const r of alleSpesen()){
+    const z = (r.zweck || "").trim();
+    if(z) zaehler.set(z, (zaehler.get(z) || 0) + 1);
+  }
+  return [...zaehler.entries()].sort((a, b)=> b[1] - a[1]).slice(0, 6).map(e => e[0]);
+}
+
+function renderSpesen(){
+  if(!S.sp) S.sp = leereSpese(S.kz ? S.kz.d : heute());
+  const sp = S.sp;
+  if(document.activeElement !== el("sp-datum")) el("sp-datum").value = sp.d;
+  if(document.activeElement !== el("sp-zweck")) el("sp-zweck").value = sp.zweck || "";
+  if(document.activeElement !== el("sp-betrag")) el("sp-betrag").value = sp.betrag == null ? "" : rpEingabe(sp.betrag);
+
+  const vor = spesenVorschlaege();
+  el("sp-vorschlaege").innerHTML = vor.map(z =>
+    '<button type="button" class="chip mini" data-zweck="' + esc(z) + '">' + esc(z) + "</button>").join("");
+
+  // Liste: der Zeitraum, in dem die aktuelle Zählung steht
+  const stich = S.kz ? S.kz.d : heute();
+  const z = zeitraumFor(stich), f = zeitraumFenster(z, stich);
+  const liste = alleSpesen().filter(r => imZeitraum(r, z, f));
+  el("sp-liste").innerHTML = liste.length
+    ? liste.map(r =>
+        '<button class="row" data-spedit="' + r.id + '" data-y="' + r.y + '">' +
+          '<span class="strecke">' + esc(r.zweck || "ohne Angabe") + "</span>" +
+          '<span class="num" style="font-weight:600">' + rp(r.betrag) + "</span>" +
+          '<span class="meta">' + fmtDate(r.d) +
+          (S.outbox.some(j => j.id === r.id) ? ' <span class="flag">wartet</span>' : "") + "</span>" +
+        "</button>").join("")
+    : '<p class="empty">Im Zeitraum ' + esc(zeitraumTitel(z, f)) + " noch keine Spese.</p>";
+  el("sp-summe").innerHTML = liste.length
+    ? zeile("<b>Summe " + esc(zeitraumTitel(z, f)) + "</b>", "",
+            "<b>" + rp(liste.reduce((s, r)=> s + (r.betrag || 0), 0)) + "</b>")
+    : "";
+
+  el("sp-save").querySelector("b").textContent = sp.edit ? "Änderung speichern" : "Spese erfassen";
+  el("sp-save-sub").textContent = sp.edit ? "" : "mindert das Geld in der Kasse";
+  el("sp-abbruch").hidden = !sp.edit;
+  el("sp-delete").hidden = !sp.edit;
+}
+
+el("sp-vorschlaege").addEventListener("click", e => {
+  const b = e.target.closest("[data-zweck]"); if(!b) return;
+  S.sp.zweck = b.dataset.zweck;
+  el("sp-zweck").value = S.sp.zweck;
+  el("sp-betrag").focus();
+});
+el("sp-datum").addEventListener("change", e => { S.sp.d = e.target.value || heute(); });
+el("sp-zweck").addEventListener("input", e => { S.sp.zweck = e.target.value; });
+el("sp-betrag").addEventListener("input", e => { S.sp.betrag = parseFranken(e.target.value); });
+
+el("sp-abbruch").addEventListener("click", () => {
+  S.sp = leereSpese(S.kz ? S.kz.d : heute());
+  renderSpesen(); el("sp-hint").textContent = "";
+});
+
+el("sp-save").addEventListener("click", async () => {
+  const sp = S.sp;
+  const betrag = parseFranken(el("sp-betrag").value);
+  if(!betrag){ el("sp-hint").textContent = "Bitte einen Betrag eingeben."; return; }
+  const zweck = (el("sp-zweck").value || "").trim();
+  if(!zweck){ el("sp-hint").textContent = "Bitte angeben, wofür die Spese war."; return; }
+  const d = el("sp-datum").value || heute();
+  const row = {d, z: zeitraumFor(d), zweck, betrag, ts: sp.editTs || Date.now()};
+  const y = d.slice(0, 4);
+  let id = sp.edit || newId();
+  if(sp.edit && sp.editY && sp.editY !== y){
+    const alt = (S.spesen[sp.editY] || {})[sp.edit];
+    if(alt){
+      S.spesen[sp.editY] = {...S.spesen[sp.editY], [sp.edit]: {...alt, del:1}};
+      await schreibe({path:"spesen/" + sp.editY + ".json", id: sp.edit, row:{...alt, del:1}});
+    }
+    id = newId();
+  }
+  S.spesen[y] = {...(S.spesen[y] || {}), [id]: row};
+  cacheSave();
+  meldung((sp.edit ? "Spese geändert" : "Spese erfasst") + " – " + rp(betrag));
+  S.sp = leereSpese(d);
+  el("sp-hint").textContent = "";
+  renderSpesen(); kasseAktualisieren(); renderTabCounts();
+  await schreibe({path:"spesen/" + y + ".json", id, row});
+  renderSpesen();
+});
+
+el("sp-delete").addEventListener("click", async () => {
+  const sp = S.sp; if(!sp.edit) return;
+  const alt = (S.spesen[sp.editY] || {})[sp.edit]; if(!alt) return;
+  if(!confirm("Spese «" + (alt.zweck || "ohne Angabe") + "» über " + rp(alt.betrag) + " löschen?")) return;
+  const y = sp.editY, id = sp.edit;
+  S.spesen[y] = {...S.spesen[y], [id]: {...alt, del:1}};
+  cacheSave(); meldung("Spese gelöscht");
+  S.sp = leereSpese(S.kz ? S.kz.d : heute());
+  renderSpesen(); kasseAktualisieren(); renderTabCounts();
+  await schreibe({path:"spesen/" + y + ".json", id, row:{...alt, del:1}});
+  renderSpesen();
+});
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-spedit]"); if(!b) return;
+  const r = (S.spesen[b.dataset.y] || {})[b.dataset.spedit]; if(!r) return;
+  S.sp = {d:r.d, zweck:r.zweck || "", betrag:r.betrag, edit:b.dataset.spedit, editY:b.dataset.y, editTs:r.ts};
+  renderSpesen();
+  el("sp-zweck").scrollIntoView({block:"center", behavior:"smooth"});
 });
 
 
@@ -1953,7 +2136,8 @@ function gewaehlterZeitraum(){
 function zeitraumGeladen(p){
   const monate = [p.f.von.slice(0, 7), p.f.bis.slice(0, 7)];
   const jahre  = [p.f.von.slice(0, 4), p.f.bis.slice(0, 4)];
-  return monate.every(mo => S.loaded.includes(mo)) && jahre.every(j => S.abos[j] && S.kasse[j]);
+  return monate.every(mo => S.loaded.includes(mo)) &&
+         jahre.every(j => S.abos[j] && S.kasse[j] && S.spesen[j]);
 }
 async function zeitraumLaden(p){
   if(!Store.bereit()) return false;
@@ -1963,6 +2147,7 @@ async function zeitraumLaden(p){
   for(const j of new Set([p.f.von.slice(0, 4), p.f.bis.slice(0, 4)])){
     if(!S.abos[j]){ await ladeAbos(j); neu = true; }
     if(!S.kasse[j]){ await ladeKasse(j); neu = true; }
+    if(!S.spesen[j]){ await ladeSpesen(j); neu = true; }
   }
   return neu;
 }
@@ -1970,6 +2155,9 @@ async function zeitraumLaden(p){
 function abrechnungDaten(p){
   const fahrten = alleFahrten().filter(r => imZeitraum(r, p.z, p.f));
   const abos    = alleAbos().filter(r => imZeitraum(r, p.z, p.f));
+  const spesen  = alleSpesen().filter(r => imZeitraum(r, p.z, p.f))
+                              .sort((a, b)=> a.d !== b.d ? (a.d < b.d ? -1 : 1) : (a.ts || 0) - (b.ts || 0));
+  const spesenTotal = spesen.reduce((s, r)=> s + (r.betrag || 0), 0);
   const kassen  = alleKassen().filter(r => imZeitraum(r, p.z, p.f))
                               .sort((a, b)=> a.d !== b.d ? (a.d < b.d ? -1 : 1) : (a.ts || 0) - (b.ts || 0));
   const einsaetze = [];
@@ -2001,7 +2189,7 @@ function abrechnungDaten(p){
   const twintEF  = tot.t * TARIF.einzelfahrt;
   const twintAbo = aboZeilen.reduce((s, z)=> s + (z.twint ? (z.aM ? TARIF.aboMonat : TARIF.abo10) : 0), 0);
   return {p, einsaetze, tot, aboZeilen, aTot, barEF, barAbo, twintEF, twintAbo, kassen,
-          vollstaendig: zeitraumGeladen(p)};
+          spesen, spesenTotal, vollstaendig: zeitraumGeladen(p)};
 }
 
 function abrechnungHtml(a){
@@ -2046,6 +2234,19 @@ function abrechnungHtml(a){
     '<div class="bilanz-z ergebnis"><span>Bar total</span><b>' + chf(a.barEF + a.barAbo) + '</b></div>' +
   '</div>' +
   '<p class="note">Nicht in bar, zur Information: Twint Einzelfahrten ' + chf(a.twintEF) + ', Twint Abos ' + chf(a.twintAbo) + '.</p>';
+
+  h += '<h3 class="k-titel">Spesen <span class="lbl">aus der Kasse bezahlt</span></h3>';
+  h += a.spesen.length
+    ? '<div class="tabelle-rahmen"><table class="abr"><thead><tr><th class="l">Datum</th>' +
+      '<th class="l">Wofür</th><th>Betrag</th></tr></thead><tbody>' +
+      a.spesen.map(r => '<tr><td class="l">' + fmtDate(r.d) + '</td><td class="l">' + esc(r.zweck || "") +
+        '</td><td>' + rp(r.betrag) + "</td></tr>").join("") +
+      '<tr class="total"><td class="l">Total</td><td></td><td>' + rp(a.spesenTotal) + "</td></tr>" +
+      "</tbody></table></div>" +
+      '<div class="bilanz" style="margin-top:10px"><div class="bilanz-z ergebnis">' +
+      "<span>Bar total abzüglich Spesen</span><b>" +
+      rp((a.barEF + a.barAbo) * 100 - a.spesenTotal) + "</b></div></div>"
+    : '<p class="empty">Keine Spesen in diesem Zeitraum.</p>';
 
   h += '<h3 class="k-titel">Kassenzählungen im Zeitraum</h3>';
   h += a.kassen.length
@@ -2218,6 +2419,20 @@ function pdfAbrechnung(a){
   doc.text("Nicht in bar, zur Information: Twint Einzelfahrten " + chf(a.twintEF) + ", Twint Abos " + chf(a.twintAbo) + ".", 15, y);
 
   // Kassenzählungen gehören nicht auf die Abrechnung, dafür gibt es das eigene Kassen-PDF
+  if(a.spesen.length){
+    const platz = 6 + 6 + a.spesen.length * 5.2 + 14 + 20;
+    y = pdfUeberschrift(doc, "Spesen – aus der Kasse bezahlt", y + 9, platz);
+    doc.autoTable({...PDF_TABELLE, startY:y,
+      head:[["Datum", "Wofür", "Betrag"]],
+      body: a.spesen.map(r => [fmtDatum4(r.d), r.zweck || "", pdfText(rp(r.betrag))]),
+      foot:[["Total", "", pdfText(rp(a.spesenTotal))]],
+      didParseCell: linksBis(2)});
+    doc.autoTable({...PDF_TABELLE, startY: doc.lastAutoTable.finalY + 4, margin:{left:15, right:75},
+      body:[], foot:[["Bar total abzüglich Spesen", "",
+                      pdfText(rp((a.barEF + a.barAbo) * 100 - a.spesenTotal))]],
+      didParseCell: linksBis(2)});
+    y = doc.lastAutoTable.finalY;
+  }
   pdfVisum(doc, y + 22);
   pdfFuss(doc);
   return doc;
@@ -2228,6 +2443,7 @@ function pdfKasse(){
   const v = barVerkaeufe(k.d);
   const kasse = summeRp(k.kasse, NOM_KASSE), stock = summeRp(k.stock, NOM_STOCK);
   const verk = k.verkaeufe == null ? v.rappen : k.verkaeufe;
+  const spes = k.spesen == null ? spesenBis(k.d).rappen : k.spesen;
   const doc = pdfNeu("Kassenzählung EBuxi",
     wochentagLang(k.d) + ", " + fmtDatum4(k.d) + "  ·  Zeitraum " + zeitraumTitel(v.z, v.f));
 
@@ -2249,10 +2465,11 @@ function pdfKasse(){
   doc.autoTable({...PDF_TABELLE, startY:y,
     body:[
       ["Summe Stückelung", "alles Geld in der Kasse", pdfText(rp(kasse))],
+      ["+ Spesen aus der Kasse", spes ? "liegen nicht mehr in der Kasse" : "keine", "+ " + pdfText(rp(spes))],
       ["- Aktuelle Verkäufe", pdfText(verkInfo), "- " + pdfText(rp(verk))],
       ["- Mein Stock", "eigenes Wechselgeld", "- " + pdfText(rp(stock))]
     ],
-    foot:[["Ergebnis", "", pdfText(rp(kasse - verk - stock))]],
+    foot:[["Ergebnis", "", pdfText(rp(kasse + spes - verk - stock))]],
     didParseCell: linksBis(2)});
   y = doc.lastAutoTable.finalY + 6;
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(88, 92, 87);
