@@ -78,7 +78,12 @@ denselben Monat gefahrlos ergänzen können.
   Mein Stock = Ergebnis. «Aktuelle Verkäufe» rechnet die App selbst: Bar-Fahrten × 4.–
   plus bar verkaufte Abos, vom Beginn des Zeitraums bis und mit dem Zähltag. Der Betrag
   lässt sich von Hand überschreiben. «Mein Stock» wird wie in der Mappe nur mit 100er
-  bis 1er gezählt.
+  bis 1er gezählt und ist mit der üblichen Stückelung vorbelegt (2×50, 3×20, 5×10,
+  5×5, 5×2, 10×1 = 255.–). Die Werte lassen sich in jeder Zählung ändern;
+  «Standard einsetzen» stellt sie wieder her, «als Standard merken» macht die
+  aktuelle Stückelung zur neuen Vorbelegung (in `stamm/verweise.json` unter
+  `stockStandard`, damit alle Geräte dieselbe haben). Eine gespeicherte Zählung
+  behält immer ihren eigenen Stock.
 * **Spesen** werden immer aus der Kasse bezahlt. Darum fehlt ihr Betrag im gezählten
   Geld und wird in der Zählung wieder **dazugerechnet**:
   `Summe Stückelung + Spesen − Verkäufe − Mein Stock = Ergebnis`.

@@ -479,7 +479,10 @@ table.abr .null{color:var(--ink3)}
         <h3 class="k-titel">Kasse <span class="lbl">alles Geld in der Kasse</span></h3>
         <div class="zaehl" id="k-kasse"></div>
 
-        <h3 class="k-titel">Mein Stock <span class="lbl">eigenes Wechselgeld</span></h3>
+        <h3 class="k-titel">Mein Stock <span class="lbl">eigenes Wechselgeld</span>
+          <button type="button" class="linkbtn" id="k-stock-standard">Standard einsetzen</button>
+          <button type="button" class="linkbtn" id="k-stock-merken">als Standard merken</button>
+        </h3>
         <div class="zaehl" id="k-stock"></div>
 
         <h3 class="k-titel">Ergebnis</h3>
@@ -665,6 +668,7 @@ const S = {
   tab:"fahrt", jSuche:"",
   kasse:{},             // jahr -> {id:row}
   spesen:{},            // jahr -> {id:row}
+  stockStandard:null,   // eigene Vorbelegung von «Mein Stock», sonst STOCK_STANDARD
   sp:null,              // Spese in Arbeit
   bestandArt:"zehner",  // welche Nummernliste gerade gezeigt wird
   bestandOffen:false,   // Bestandsänderung wartet noch auf GitHub
@@ -787,6 +791,7 @@ function cacheSave(){
       fahrten:S.fahrten, abos:S.abos, kasse:S.kasse, spesen:S.spesen, bestand:S.bestand, outbox:S.outbox,
       bestandOffen:S.bestandOffen,
       kopf:S.kopf, loaded:S.loaded,
+      stockStandard:S.stockStandard,
       stamm:{strassen:S.strassen, schichten:S.schichten, zeitraeume:S.zeitraeume, top:S.top}
     }));
   }catch(e){/* Speicher voll oder blockiert – die Cloud bleibt die Wahrheit */}
@@ -799,6 +804,7 @@ function cacheLoad(){
     if(c.abos) S.abos=c.abos;
     if(c.kasse) S.kasse=c.kasse;
     if(c.spesen) S.spesen=c.spesen;
+    if(c.stockStandard) S.stockStandard=c.stockStandard;
     if(c.bestandOffen) S.bestandOffen=true;
     if(c.bestand) S.bestand=c.bestand;
     if(Array.isArray(c.outbox)) S.outbox=c.outbox;
@@ -951,6 +957,7 @@ async function ladeStamm(){
     if(Array.isArray(d.schichten) && d.schichten.length) S.schichten = d.schichten;
     if(Array.isArray(d.zeitraeume) && d.zeitraeume.length) S.zeitraeume = d.zeitraeume;
     if(Array.isArray(d.top)) S.top = d.top;
+    if(d.stockStandard && typeof d.stockStandard === "object") S.stockStandard = d.stockStandard;
     cacheSave();
   }
   return g.status;
@@ -1075,6 +1082,19 @@ async function bestandAendern(art, aendern, nachricht){
   if(p.status === "ok"){ S.bestand = fern; S.bestandOffen = false; }
   else S.bestandOffen = true;
   cacheSave();
+  return p.status === "ok";
+}
+
+/**
+ * Ändert die Stammdaten. aendern() bekommt den aktuellen Stand von GitHub und
+ * gibt den neuen zurück, damit nichts überschrieben wird, was dort schon steht.
+ */
+async function stammAendern(aendern, nachricht){
+  if(!Store.bereit()) return false;
+  const g = await Store.hole("stamm/verweise.json", false);
+  if(["offline","kein-zugriff","fehler","fehlt"].includes(g.status)) return false;
+  const p = await Store.lege("stamm/verweise.json", aendern(g.daten || {}), g.sha,
+                             nachricht || "EBuxi: Stammdaten geändert");
   return p.status === "ok";
 }
 
@@ -1710,6 +1730,13 @@ const NOM_KASSE = [
   {k:"0.1", rp:10,    name:"10 Rp."},{k:"0.05",rp:5,   name:"5 Rp."}
 ];
 const NOM_STOCK = NOM_KASSE.slice(0, 7);          // wie in der Mappe: 100er bis 1er
+/** Übliche Stückelung von «Mein Stock», zusammen 255.–. Lässt sich in der
+ *  Zählung ändern und mit «Als Standard merken» dauerhaft überschreiben. */
+const STOCK_STANDARD = {"50":2, "20":3, "10":5, "5":5, "2":5, "1":10};
+function stockStandard(){
+  const eigen = S.stockStandard;
+  return eigen && Object.keys(eigen).length ? {...eigen} : {...STOCK_STANDARD};
+}
 const LS_KASSE = "ebuxi.kasse.entwurf";
 const DATEN_AB = "2024-09-16";                    // erster Tag mit Fahrten
 
@@ -1735,7 +1762,10 @@ function wochentagLang(d){
   return ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"][new Date(d+"T12:00:00").getDay()];
 }
 
-function leereZaehlung(d){ return {d: d || heute(), kasse:{}, stock:{}, verkaeufe:null, spesen:null, edit:null, editY:null}; }
+function leereZaehlung(d){
+  return {d: d || heute(), kasse:{}, stock: stockStandard(),
+          verkaeufe:null, spesen:null, edit:null, editY:null};
+}
 function summeRp(werte, liste){ return liste.reduce((s, n)=> s + (Number(werte[n.k]) || 0) * n.rp, 0); }
 
 function alleKassen(){
@@ -1908,6 +1938,23 @@ el("k-datum").addEventListener("change", async e => {
   if(v.f && !zeitraumGeladen(p) && Store.bereit()){
     if(await zeitraumLaden(p)){ renderKasseKopf(); renderBilanz(); }
   }
+});
+
+el("k-stock-standard").addEventListener("click", () => {
+  S.kz.stock = stockStandard();
+  kasseEntwurfSichern();
+  el("k-stock").innerHTML = zaehlTabelle("stock", NOM_STOCK, S.kz.stock);
+  renderBilanz();
+  meldung("Standard eingesetzt – " + rp(summeRp(S.kz.stock, NOM_STOCK)));
+});
+
+el("k-stock-merken").addEventListener("click", async () => {
+  const stock = {...S.kz.stock};
+  if(!summeRp(stock, NOM_STOCK)){ el("k-hint").textContent = "Zuerst «Mein Stock» zählen."; return; }
+  S.stockStandard = stock; cacheSave();
+  el("k-hint").textContent = "";
+  meldung("Standard gemerkt – " + rp(summeRp(stock, NOM_STOCK)));
+  await stammAendern(d => ({...d, stockStandard: stock}), "EBuxi: Standard für «Mein Stock»");
 });
 
 el("k-leeren").addEventListener("click", () => {

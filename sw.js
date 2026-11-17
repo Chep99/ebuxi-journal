@@ -1,5 +1,5 @@
 /* Offline-Speicher: App-Huelle zwischenlagern, Daten immer live holen. */
-const CACHE = "ebuxi-v5";
+const CACHE = "ebuxi-v6";
 const HUELLE = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./icon-180.png"];
 
 self.addEventListener("install", e=>{
